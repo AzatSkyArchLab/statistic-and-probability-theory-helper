@@ -1,0 +1,3898 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Калькулятор по теории вероятностей и математической статистике</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+/* === Wrapper isolation: все стили привязаны к .terver-app, чтобы не утекали в Tilda === */
+.terver-app, .terver-app *, .terver-app *::before, .terver-app *::after { box-sizing: border-box; }
+.terver-app {
+  --bg:        #faf8f3;
+  --card:      #ffffff;
+  --text:      #1a1a1a;
+  --muted:     #6b6b6b;
+  --border:    #d8d4c8;
+  --accent:    #2a4a7f;
+  --accent-soft: #e8eef5;
+  --result-bg: #f4f1e8;
+  --result-text: #111;
+  --chart-grid: #e6e2d6;
+  --chart-axis: #888;
+  --chart-bar:  #4a6da3;
+  --chart-bar-hi: #b04545;
+  --chart-line: #2a4a7f;
+  --chart-fill: rgba(42,74,127,0.08);
+  --chart-marker: #b04545;
+  --error: #b04545;
+  --shadow: 0 1px 2px rgba(0,0,0,0.04);
+
+  font-family: "Roboto", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.55;
+  font-size: 15px;
+  padding: 24px 16px 48px;
+  min-height: 100vh;
+  transition: background .2s, color .2s;
+}
+.terver-app[data-theme="dark"] {
+  --bg:        #14171c;
+  --card:      #1c2027;
+  --text:      #e8e3d8;
+  --muted:     #978f81;
+  --border:    #2c323b;
+  --accent:    #88aedd;
+  --accent-soft: #232932;
+  --result-bg: #232932;
+  --result-text: #f4ecd8;
+  --chart-grid: #262c34;
+  --chart-axis: #6a7080;
+  --chart-bar:  #6c98d4;
+  --chart-bar-hi: #d57878;
+  --chart-line: #88aedd;
+  --chart-fill: rgba(136,174,221,0.12);
+  --chart-marker: #d57878;
+  --error: #d57878;
+  --shadow: 0 1px 3px rgba(0,0,0,0.35);
+}
+
+.terver-app .tv-container { max-width: 1200px; margin: 0 auto; }
+
+.terver-app .tv-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 24px;
+}
+.terver-app h1 {
+  font-family: inherit;
+  font-size: 24px;
+  font-weight: 500;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+.terver-app .tv-subtitle {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+  font-style: italic;
+}
+.terver-app .tv-theme {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 7px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13.5px;
+  white-space: nowrap;
+  transition: all .15s;
+}
+.terver-app .tv-theme:hover { border-color: var(--accent); color: var(--accent); }
+
+.terver-app .tv-layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 24px;
+  align-items: start;
+}
+@media (max-width: 820px) {
+  .terver-app .tv-layout { grid-template-columns: 1fr; }
+}
+
+.terver-app .tv-nav {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 8px;
+  position: sticky;
+  top: 12px;
+  box-shadow: var(--shadow);
+}
+@media (max-width: 820px) { .terver-app .tv-nav { position: static; } }
+.terver-app .tv-nav button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  color: var(--text);
+  padding: 7px 10px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 14px;
+  transition: background .12s, color .12s;
+}
+.terver-app .tv-nav button:hover { background: var(--accent-soft); }
+.terver-app .tv-nav button.active {
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+}
+
+.terver-app .tv-page {
+  display: none;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 24px 26px;
+  box-shadow: var(--shadow);
+}
+.terver-app .tv-page.active { display: block; }
+
+.terver-app .tv-page h2 {
+  font-size: 20px;
+  font-weight: 500;
+  margin: 0 0 6px;
+  letter-spacing: -0.005em;
+}
+.terver-app .tv-page .tv-desc {
+  margin: 0 0 14px;
+  color: var(--muted);
+  font-size: 14px;
+  font-style: italic;
+}
+
+.terver-app .tv-formula {
+  font-family: "Cambria Math", Cambria, "STIX Two Math", "Times New Roman", serif;
+  font-size: 17px;
+  background: var(--result-bg);
+  border-left: 3px solid var(--accent);
+  padding: 10px 14px;
+  margin: 0 0 18px;
+  border-radius: 0 3px 3px 0;
+  overflow-x: auto;
+}
+.terver-app .tv-formula i { font-style: italic; }
+.terver-app .tv-formula sup, .terver-app .tv-formula sub { font-size: 0.75em; }
+
+.terver-app .tv-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 18px;
+}
+.terver-app .tv-tabs button {
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 14px;
+  padding: 8px 14px;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: all .12s;
+}
+.terver-app .tv-tabs button:hover { color: var(--text); }
+.terver-app .tv-tabs button.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  font-weight: 600;
+}
+.terver-app .tv-subpage { display: none; }
+.terver-app .tv-subpage.active { display: block; }
+
+.terver-app .tv-inputs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.terver-app .tv-input {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.terver-app .tv-input label {
+  font-size: 13px;
+  color: var(--muted);
+  font-style: italic;
+}
+.terver-app .tv-input input {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 8px 12px;
+  border-radius: 3px;
+  font-family: inherit;
+  font-size: 15px;
+  transition: border-color .12s, box-shadow .12s;
+}
+.terver-app .tv-input input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.terver-app .tv-results {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.terver-app .tv-result {
+  background: var(--result-bg);
+  border-radius: 3px;
+  padding: 12px 16px;
+  border-left: 3px solid var(--accent);
+}
+.terver-app .tv-result .tv-rlabel {
+  font-size: 12.5px;
+  color: var(--muted);
+  font-style: italic;
+  margin-bottom: 3px;
+}
+.terver-app .tv-result .tv-rval {
+  font-family: "Cambria Math", Cambria, "Times New Roman", serif;
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--result-text);
+  word-break: break-all;
+}
+.terver-app .tv-result .tv-rval.error {
+  color: var(--error);
+  font-size: 14px;
+  font-weight: 400;
+  font-style: italic;
+}
+
+.terver-app .tv-table-wrap {
+  overflow-x: auto;
+  margin-bottom: 18px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+}
+.terver-app table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+  font-family: "Cambria Math", Cambria, serif;
+}
+.terver-app th, .terver-app td {
+  border: 1px solid var(--border);
+  padding: 6px 10px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.terver-app th {
+  background: var(--result-bg);
+  font-weight: 600;
+  color: var(--accent);
+  font-style: italic;
+}
+
+.terver-app .tv-chart {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 8px;
+  margin-top: 6px;
+}
+.terver-app .tv-chart canvas {
+  display: block;
+  width: 100%;
+  height: 320px;
+}
+.terver-app .tv-chart-title {
+  font-size: 13px;
+  color: var(--muted);
+  text-align: center;
+  font-style: italic;
+  margin: 4px 0 0;
+}
+
+.terver-app .tv-help {
+  font-size: 13px;
+  color: var(--muted);
+  font-style: italic;
+  margin: 6px 0 14px;
+}
+.terver-app .tv-help b { color: var(--text); font-style: normal; }
+
+.terver-app .tv-footer {
+  text-align: center;
+  color: var(--muted);
+  font-size: 12.5px;
+  font-style: italic;
+  margin-top: 32px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+}
+
+.terver-app .tv-page-num {
+  display: inline-block;
+  font-family: "Cambria Math", serif;
+  color: var(--accent);
+  margin-right: 8px;
+}
+
+/* === ГРУППЫ В НАВИГАЦИИ === */
+.terver-app .tv-nav-group {
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  padding: 10px 10px 4px;
+  font-weight: 500;
+}
+.terver-app .tv-nav-group:first-child { padding-top: 4px; }
+
+/* === ИКОНКА СПРАВКИ И ПОПОВЕР === */
+.terver-app .tv-help-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 500;
+  font-family: inherit;
+  margin-left: 6px;
+  cursor: pointer;
+  user-select: none;
+  vertical-align: middle;
+  transition: all .12s;
+  background: var(--card);
+}
+.terver-app .tv-help-icon:hover {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+.terver-app .tv-popover {
+  position: fixed;
+  background: var(--card);
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 12px 14px;
+  border-radius: 4px;
+  font-size: 13.5px;
+  max-width: 360px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+  z-index: 99999;
+  line-height: 1.5;
+  display: none;
+}
+.terver-app .tv-popover .tv-popover-formula {
+  font-family: "Cambria Math", Cambria, "Times New Roman", serif;
+  background: var(--result-bg);
+  padding: 6px 8px;
+  border-radius: 3px;
+  margin-top: 6px;
+  font-size: 14px;
+  border-left: 2px solid var(--accent);
+}
+
+/* === ВВОД ДАННЫХ ДЛЯ СТАТИСТИКИ === */
+.terver-app textarea {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 8px 12px;
+  border-radius: 3px;
+  font-family: "Cambria Math", Cambria, monospace;
+  font-size: 14px;
+  width: 100%;
+  resize: vertical;
+  transition: border-color .12s, box-shadow .12s;
+}
+.terver-app textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.terver-app .tv-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin: 8px 0 14px;
+}
+.terver-app .tv-btn {
+  background: var(--card);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 13.5px;
+  padding: 6px 12px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all .12s;
+}
+.terver-app .tv-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.terver-app .tv-btn.primary {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+.terver-app .tv-btn.primary:hover {
+  background: var(--accent);
+  filter: brightness(1.08);
+}
+.terver-app .tv-actions-info {
+  margin-left: auto;
+  font-size: 13px;
+  color: var(--muted);
+  font-style: italic;
+}
+
+.terver-app .tv-cells {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(78px, 1fr));
+  gap: 6px;
+  margin-bottom: 16px;
+}
+.terver-app .tv-cell {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.terver-app .tv-cell input {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 6px 22px 6px 8px;
+  border-radius: 3px;
+  font-family: "Cambria Math", Cambria, monospace;
+  font-size: 14px;
+  width: 100%;
+  font-variant-numeric: tabular-nums;
+  transition: border-color .12s;
+}
+.terver-app .tv-cell input:focus { outline: none; border-color: var(--accent); }
+.terver-app .tv-cell .tv-cell-x {
+  position: absolute;
+  right: 4px;
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 13px;
+  padding: 2px 4px;
+  line-height: 1;
+}
+.terver-app .tv-cell .tv-cell-x:hover { color: var(--error); }
+.terver-app .tv-cell-add {
+  background: var(--bg);
+  border: 1px dashed var(--border);
+  color: var(--muted);
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 16px;
+  font-family: inherit;
+  padding: 6px 8px;
+  transition: all .12s;
+}
+.terver-app .tv-cell-add:hover { border-color: var(--accent); color: var(--accent); }
+
+.terver-app .tv-section-title {
+  font-size: 16px;
+  font-weight: 500;
+  margin: 22px 0 10px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* === Сетки строк для дискретного / интервального рядов === */
+.terver-app .tv-row-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+.terver-app .tv-data-row {
+  display: grid;
+  grid-template-columns: 28px 1fr 1fr 28px;
+  gap: 6px;
+  align-items: center;
+}
+.terver-app .tv-data-row.tv-tri {
+  grid-template-columns: 28px 1fr 1fr 1fr 28px;
+}
+.terver-app .tv-data-row .tv-row-num {
+  color: var(--muted);
+  font-size: 13px;
+  text-align: right;
+  font-style: italic;
+}
+.terver-app .tv-data-row input {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 6px 8px;
+  border-radius: 3px;
+  font-family: "Cambria Math", Cambria, monospace;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  width: 100%;
+}
+.terver-app .tv-data-row input:focus { outline: none; border-color: var(--accent); }
+.terver-app .tv-data-row .tv-cell-x {
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 2px 4px;
+}
+.terver-app .tv-data-row .tv-cell-x:hover { color: var(--error); }
+.terver-app .tv-data-head {
+  display: grid;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--muted);
+  font-style: italic;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 4px;
+}
+.terver-app .tv-data-head.tv-pair { grid-template-columns: 28px 1fr 1fr 28px; }
+.terver-app .tv-data-head.tv-tri  { grid-template-columns: 28px 1fr 1fr 1fr 28px; }
+.terver-app .tv-data-head > div { padding-left: 2px; }
+.terver-app .tv-mode-input { margin-bottom: 4px; }
+.terver-app .tv-warn {
+  color: var(--error);
+  font-size: 13px;
+  font-style: italic;
+  margin: 6px 0 12px;
+}
+.terver-app .tv-input input:disabled {
+  background: var(--result-bg);
+  color: var(--muted);
+  cursor: not-allowed;
+}
+.terver-app .tv-conclusion {
+  background: var(--result-bg);
+  border-left: 3px solid var(--accent);
+  padding: 10px 14px;
+  border-radius: 0 3px 3px 0;
+  margin: 12px 0 16px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.terver-app .tv-conclusion.reject  { border-left-color: var(--error); }
+.terver-app .tv-conclusion.accept  { border-left-color: var(--accent); }
+</style>
+</head>
+<body>
+
+<div class="terver-app" id="terverApp" data-theme="light">
+<div class="tv-container">
+
+<header class="tv-header">
+  <div>
+    <h1>Теория вероятностей и математическая статистика</h1>
+    <p class="tv-subtitle">Калькулятор и визуализация распределений</p>
+  </div>
+  <button class="tv-theme" id="tvTheme">☾ Тёмная</button>
+</header>
+
+<div class="tv-layout">
+  <nav class="tv-nav" id="tvNav"></nav>
+  <main id="tvMain"></main>
+</div>
+
+<footer class="tv-footer">
+  Формулы и логика по материалам сайта mathprofi.ru (А. Емелин)
+</footer>
+
+</div>
+</div>
+
+<script>
+(function(){
+'use strict';
+
+/* ============================================================
+   1. МАТЕМАТИЧЕСКАЯ БИБЛИОТЕКА
+   Все специальные функции, нужные для воспроизведения формул
+   из исходной таблицы (без внешних зависимостей).
+   ============================================================ */
+const M = (function() {
+  const SQRT2  = Math.SQRT2;
+  const SQRT2PI = Math.sqrt(2*Math.PI);
+  const LN_2PI = Math.log(2*Math.PI);
+
+  /* erf(x) — функция ошибок, формула A&S 7.1.26 (≈ 1.5e-7) */
+  function erf(x) {
+    const a1 =  0.254829592, a2 = -0.284496736, a3 = 1.421413741;
+    const a4 = -1.453152027, a5 =  1.061405429, p  = 0.3275911;
+    const sgn = x < 0 ? -1 : 1;
+    x = Math.abs(x);
+    const t = 1 / (1 + p*x);
+    const y = 1 - (((((a5*t + a4)*t) + a3)*t + a2)*t + a1)*t * Math.exp(-x*x);
+    return sgn * y;
+  }
+
+  /* log Γ(x) — Lanczos, для x>0 */
+  function logGamma(x) {
+    const c = [76.18009172947146, -86.50532032941677, 24.01409824083091,
+               -1.231739572450155, 1.208650973866179e-3, -5.395239384953e-6];
+    let y = x, t = x + 5.5;
+    t -= (x + 0.5) * Math.log(t);
+    let s = 1.000000000190015;
+    for (let j = 0; j < 6; j++) s += c[j] / ++y;
+    return -t + Math.log(2.5066282746310005 * s / x);
+  }
+  function gammaFn(x) { return Math.exp(logGamma(x)); }
+
+  /* Факториал (точный для малых n, через Γ для больших) */
+  function fact(n) {
+    if (n < 0 || !Number.isInteger(n)) return NaN;
+    if (n <= 170) {
+      let r = 1;
+      for (let i = 2; i <= n; i++) r *= i;
+      return r;
+    }
+    return Math.exp(logGamma(n + 1));
+  }
+  /* C(n,k) — через log-Γ для устойчивости */
+  function combin(n, k) {
+    if (k < 0 || k > n || !Number.isInteger(n) || !Number.isInteger(k)) return NaN;
+    if (k === 0 || k === n) return 1;
+    if (k > n - k) k = n - k;
+    return Math.round(Math.exp(logGamma(n+1) - logGamma(k+1) - logGamma(n-k+1)));
+  }
+  /* P(n,k) = n!/(n-k)! */
+  function perm(n, k) {
+    if (k < 0 || k > n || !Number.isInteger(n) || !Number.isInteger(k)) return NaN;
+    let r = 1;
+    for (let i = n - k + 1; i <= n; i++) r *= i;
+    return r;
+  }
+
+  /* Регуляризованная нижняя неполная гамма P(a,x) */
+  function gammaP(a, x) {
+    if (x < 0 || a <= 0) return NaN;
+    if (x === 0) return 0;
+    if (x < a + 1) {
+      // ряд
+      let ap = a, sum = 1/a, del = sum;
+      for (let n = 1; n <= 300; n++) {
+        ap++;
+        del *= x/ap;
+        sum += del;
+        if (Math.abs(del) < Math.abs(sum)*1e-15) break;
+      }
+      return sum * Math.exp(-x + a*Math.log(x) - logGamma(a));
+    }
+    // непрерывная дробь для Q(a,x), затем 1 - Q
+    return 1 - gammaQ(a, x);
+  }
+  function gammaQ(a, x) {
+    if (x < 0 || a <= 0) return NaN;
+    if (x === 0) return 1;
+    if (x < a + 1) return 1 - gammaP(a, x);
+    const FPMIN = 1e-300;
+    let b = x + 1 - a, c = 1/FPMIN, d = 1/b, h = d;
+    for (let i = 1; i <= 300; i++) {
+      const an = -i*(i - a);
+      b += 2;
+      d = an*d + b; if (Math.abs(d) < FPMIN) d = FPMIN;
+      c = b + an/c; if (Math.abs(c) < FPMIN) c = FPMIN;
+      d = 1/d;
+      const del = d*c;
+      h *= del;
+      if (Math.abs(del - 1) < 1e-15) break;
+    }
+    return Math.exp(-x + a*Math.log(x) - logGamma(a)) * h;
+  }
+
+  /* Непрерывная дробь Lentz для бета (для |I_x(a,b)|) */
+  function betaCF(a, b, x) {
+    const FPMIN = 1e-300;
+    const qab = a + b, qap = a + 1, qam = a - 1;
+    let c = 1, d = 1 - qab*x/qap;
+    if (Math.abs(d) < FPMIN) d = FPMIN;
+    d = 1/d;
+    let h = d;
+    for (let m = 1; m <= 300; m++) {
+      const m2 = 2*m;
+      let aa = m*(b - m)*x / ((qam + m2)*(a + m2));
+      d = 1 + aa*d; if (Math.abs(d) < FPMIN) d = FPMIN;
+      c = 1 + aa/c; if (Math.abs(c) < FPMIN) c = FPMIN;
+      d = 1/d; h *= d*c;
+      aa = -(a + m)*(qab + m)*x / ((a + m2)*(qap + m2));
+      d = 1 + aa*d; if (Math.abs(d) < FPMIN) d = FPMIN;
+      c = 1 + aa/c; if (Math.abs(c) < FPMIN) c = FPMIN;
+      d = 1/d;
+      const del = d*c;
+      h *= del;
+      if (Math.abs(del - 1) < 1e-15) break;
+    }
+    return h;
+  }
+  /* Регуляризованная неполная бета I_x(a,b) */
+  function betaI(a, b, x) {
+    if (x <= 0) return 0;
+    if (x >= 1) return 1;
+    const lbt = logGamma(a + b) - logGamma(a) - logGamma(b)
+              + a*Math.log(x) + b*Math.log(1 - x);
+    if (x < (a + 1)/(a + b + 2)) {
+      return Math.exp(lbt) * betaCF(a, b, x) / a;
+    }
+    return 1 - Math.exp(lbt) * betaCF(b, a, 1 - x) / b;
+  }
+
+  /* Стандартное нормальное */
+  function normPdf(x, mu, sigma) {
+    if (sigma === undefined) { sigma = 1; mu = 0; }
+    const z = (x - mu)/sigma;
+    return Math.exp(-z*z/2) / (sigma * SQRT2PI);
+  }
+  function normCdf(x, mu, sigma) {
+    if (sigma === undefined) { sigma = 1; mu = 0; }
+    return 0.5*(1 + erf((x - mu)/(sigma*SQRT2)));
+  }
+  /* Inverse: алгоритм Beasley–Springer–Moro (точность ≈ 1e-9) */
+  function normInv(p) {
+    if (p <= 0 || p >= 1) return NaN;
+    const a = [-3.969683028665376e+01,  2.209460984245205e+02,
+               -2.759285104469687e+02,  1.383577518672690e+02,
+               -3.066479806614716e+01,  2.506628277459239e+00];
+    const b = [-5.447609879822406e+01,  1.615858368580409e+02,
+               -1.556989798598866e+02,  6.680131188771972e+01,
+               -1.328068155288572e+01];
+    const c = [-7.784894002430293e-03, -3.223964580411365e-01,
+               -2.400758277161838e+00, -2.549732539343734e+00,
+                4.374664141464968e+00,  2.938163982698783e+00];
+    const d = [ 7.784695709041462e-03,  3.224671290700398e-01,
+                2.445134137142996e+00,  3.754408661907416e+00];
+    const pl = 0.02425, ph = 1 - pl;
+    let q, r;
+    if (p < pl) {
+      q = Math.sqrt(-2*Math.log(p));
+      return (((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5]) /
+             ((((d[0]*q+d[1])*q+d[2])*q+d[3])*q + 1);
+    } else if (p <= ph) {
+      q = p - 0.5; r = q*q;
+      return (((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q /
+             (((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r + 1);
+    } else {
+      q = Math.sqrt(-2*Math.log(1 - p));
+      return -(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5]) /
+              ((((d[0]*q+d[1])*q+d[2])*q+d[3])*q + 1);
+    }
+  }
+
+  /* Биномиальное, Пуассоновское, гипергеометрическое (PMF) */
+  function binomPmf(k, n, p) {
+    if (k < 0 || k > n || !Number.isInteger(k) || !Number.isInteger(n)) return 0;
+    if (p < 0 || p > 1) return NaN;
+    if (p === 0) return k === 0 ? 1 : 0;
+    if (p === 1) return k === n ? 1 : 0;
+    const lp = logGamma(n+1) - logGamma(k+1) - logGamma(n-k+1)
+             + k*Math.log(p) + (n-k)*Math.log(1-p);
+    return Math.exp(lp);
+  }
+  function poissonPmf(k, lam) {
+    if (k < 0 || !Number.isInteger(k) || lam < 0) return NaN;
+    if (lam === 0) return k === 0 ? 1 : 0;
+    return Math.exp(k*Math.log(lam) - lam - logGamma(k+1));
+  }
+  function hypgeomPmf(k, N, K, n) {
+    if (k < 0 || n < 0 || K < 0 || N < 0) return NaN;
+    if (k > n || k > K || n > N || K > N) return 0;
+    if (n - k > N - K) return 0;
+    const lp = logGamma(K+1) - logGamma(k+1) - logGamma(K-k+1)
+             + logGamma(N-K+1) - logGamma(n-k+1) - logGamma(N-K-(n-k)+1)
+             - (logGamma(N+1) - logGamma(n+1) - logGamma(N-n+1));
+    return Math.exp(lp);
+  }
+
+  /* Стьюдент: двусторонняя p-величина и обратная */
+  /* TDIST(t, df, 2) = P(|T| > t) для t ≥ 0 */
+  function studentTwoTail(t, df) {
+    t = Math.abs(t);
+    const x = df / (df + t*t);
+    return betaI(df/2, 0.5, x);
+  }
+  /* TINV(α, df) — t такое, что P(|T| > t) = α */
+  function studentInv(alpha, df) {
+    if (alpha <= 0 || alpha >= 1) return NaN;
+    // начальное приближение через нормальное
+    let t = -normInv(alpha/2);
+    for (let i = 0; i < 60; i++) {
+      const cur = studentTwoTail(t, df);            // p = P(|T|>t)
+      // плотность T в точке t
+      const lpdf = logGamma((df+1)/2) - logGamma(df/2)
+                 - 0.5*Math.log(df*Math.PI)
+                 - ((df+1)/2)*Math.log(1 + t*t/df);
+      const pdf  = Math.exp(lpdf);
+      // dP/dt = -2 * pdf  (двусторонняя)
+      const delta = (cur - alpha) / (-2*pdf);
+      t -= delta;
+      if (t <= 0) t = 1e-6;
+      if (Math.abs(delta) < 1e-10) break;
+    }
+    return t;
+  }
+
+  /* χ²: верхний хвост (CHIDIST) и обратный (CHIINV) */
+  function chiSqUpper(x, df) {
+    if (x < 0 || df <= 0) return NaN;
+    return gammaQ(df/2, x/2);
+  }
+  function chiSqInv(alpha, df) {
+    // x такой, что P(X > x) = α, т.е. CDF(x) = 1-α
+    if (alpha <= 0 || alpha >= 1) return NaN;
+    // начальное: Wilson–Hilferty
+    const z = normInv(1 - alpha);
+    let x = df * Math.pow(1 - 2/(9*df) + z*Math.sqrt(2/(9*df)), 3);
+    if (x <= 0) x = 0.5;
+    for (let i = 0; i < 60; i++) {
+      const cdf = 1 - chiSqUpper(x, df);
+      const lpdf = (df/2 - 1)*Math.log(x) - x/2 - logGamma(df/2) - (df/2)*Math.log(2);
+      const pdf  = Math.exp(lpdf);
+      if (pdf === 0 || !isFinite(pdf)) break;
+      const delta = (cdf - (1 - alpha)) / pdf;
+      x -= delta;
+      if (x <= 0) x = 1e-6;
+      if (Math.abs(delta) < 1e-10) break;
+    }
+    return x;
+  }
+  function chiSqPdf(x, df) {
+    if (x <= 0 || df <= 0) return 0;
+    const lpdf = (df/2 - 1)*Math.log(x) - x/2 - logGamma(df/2) - (df/2)*Math.log(2);
+    return Math.exp(lpdf);
+  }
+
+  /* F-распределение: верхний хвост и обратный */
+  function fUpper(x, df1, df2) {
+    if (x <= 0) return 1;
+    return 1 - betaI(df1/2, df2/2, df1*x/(df1*x + df2));
+  }
+  function fInv(alpha, df1, df2) {
+    if (alpha <= 0 || alpha >= 1) return NaN;
+    // начальное приближение через χ²/df
+    let x = chiSqInv(alpha, df1) / df1;
+    for (let i = 0; i < 60; i++) {
+      const cur = fUpper(x, df1, df2);
+      // плотность F: f(x) = sqrt((df1*x)^df1 * df2^df2 / (df1*x+df2)^(df1+df2)) / (x * B(df1/2, df2/2))
+      const lpdf = (df1/2)*Math.log(df1) + (df2/2)*Math.log(df2)
+                 + (df1/2 - 1)*Math.log(x)
+                 - ((df1+df2)/2)*Math.log(df1*x + df2)
+                 - (logGamma(df1/2) + logGamma(df2/2) - logGamma((df1+df2)/2));
+      const pdf  = Math.exp(lpdf);
+      if (pdf === 0 || !isFinite(pdf)) break;
+      const delta = (cur - alpha) / (-pdf);
+      x -= delta;
+      if (x <= 0) x = 1e-6;
+      if (Math.abs(delta) < 1e-12) break;
+    }
+    return x;
+  }
+  function fPdf(x, df1, df2) {
+    if (x <= 0) return 0;
+    const lpdf = (df1/2)*Math.log(df1) + (df2/2)*Math.log(df2)
+               + (df1/2 - 1)*Math.log(x)
+               - ((df1+df2)/2)*Math.log(df1*x + df2)
+               - (logGamma(df1/2) + logGamma(df2/2) - logGamma((df1+df2)/2));
+    return Math.exp(lpdf);
+  }
+  function studentPdf(t, df) {
+    const lpdf = logGamma((df+1)/2) - logGamma(df/2)
+               - 0.5*Math.log(df*Math.PI)
+               - ((df+1)/2)*Math.log(1 + t*t/df);
+    return Math.exp(lpdf);
+  }
+
+  return {
+    erf, logGamma, gammaFn, fact, combin, perm,
+    gammaP, gammaQ, betaI,
+    normPdf, normCdf, normInv,
+    binomPmf, poissonPmf, hypgeomPmf,
+    studentTwoTail, studentInv, studentPdf,
+    chiSqUpper, chiSqInv, chiSqPdf,
+    fUpper, fInv, fPdf
+  };
+})();
+
+/* ============================================================
+   1b. ДОПОЛНИТЕЛЬНАЯ МАТЕМАТИКА: описательная статистика +
+        распределения, не вошедшие в исходную таблицу
+   ============================================================ */
+
+/* === ОПИСАТЕЛЬНАЯ СТАТИСТИКА === */
+M.mean = (xs) => xs.length ? xs.reduce((a,b)=>a+b, 0) / xs.length : NaN;
+M.variance = (xs, biased) => {
+  const n = xs.length;
+  if ((biased && n < 1) || (!biased && n < 2)) return NaN;
+  const m = M.mean(xs);
+  let s = 0;
+  for (const x of xs) s += (x - m)*(x - m);
+  return biased ? s/n : s/(n - 1);
+};
+M.median = (xs) => {
+  if (!xs.length) return NaN;
+  const s = [...xs].sort((a,b)=>a-b);
+  const n = s.length;
+  return n % 2 ? s[(n-1)/2] : (s[n/2-1] + s[n/2]) / 2;
+};
+M.mode = (xs) => {
+  if (!xs.length) return [];
+  const map = new Map();
+  for (const x of xs) map.set(x, (map.get(x) || 0) + 1);
+  let max = 0;
+  for (const v of map.values()) if (v > max) max = v;
+  if (max === 1) return []; // все встречаются по одному разу — моды нет
+  const res = [];
+  for (const [k, v] of map) if (v === max) res.push(k);
+  return res.sort((a,b) => a - b);
+};
+/* Линейная интерполяция между порядковыми статистиками (тип 7 в R) */
+M.quantile = (xs, p) => {
+  if (!xs.length || p < 0 || p > 1) return NaN;
+  const s = [...xs].sort((a,b)=>a-b);
+  const h = (s.length - 1) * p;
+  const lo = Math.floor(h), hi = Math.ceil(h);
+  if (lo === hi) return s[lo];
+  return s[lo] + (h - lo) * (s[hi] - s[lo]);
+};
+M.centralMoment = (xs, k) => {
+  if (xs.length < 1) return NaN;
+  const m = M.mean(xs);
+  let s = 0;
+  for (const x of xs) s += Math.pow(x - m, k);
+  return s / xs.length;
+};
+M.skewness = (xs) => {
+  if (xs.length < 2) return NaN;
+  const sd = Math.sqrt(M.variance(xs, true));
+  if (sd === 0) return NaN;
+  return M.centralMoment(xs, 3) / Math.pow(sd, 3);
+};
+/* Эксцесс по русской традиции: μ₄/σ⁴ − 3 */
+M.kurtosis = (xs) => {
+  if (xs.length < 2) return NaN;
+  const sd = Math.sqrt(M.variance(xs, true));
+  if (sd === 0) return NaN;
+  return M.centralMoment(xs, 4) / Math.pow(sd, 4) - 3;
+};
+
+/* === ГАММА-РАСПРЕДЕЛЕНИЕ Γ(k, θ) (форма + масштаб) === */
+M.gammaPdf = (x, k, theta) => {
+  if (x < 0 || k <= 0 || theta <= 0) return 0;
+  if (x === 0) return k === 1 ? 1/theta : (k > 1 ? 0 : Infinity);
+  return Math.exp((k - 1)*Math.log(x) - x/theta - k*Math.log(theta) - M.logGamma(k));
+};
+M.gammaCdf = (x, k, theta) => x <= 0 ? 0 : M.gammaP(k, x/theta);
+M.gammaInv = (p, k, theta) => {
+  if (p <= 0) return 0;
+  if (p >= 1) return Infinity;
+  // нач. приближение: квантиль χ²(2k) → /2 → *θ
+  let x = M.chiSqInv(1 - p, 2*k) * theta / 2;
+  if (!isFinite(x) || x <= 0) x = k * theta;
+  for (let i = 0; i < 60; i++) {
+    const cdf = M.gammaCdf(x, k, theta);
+    const pdf = M.gammaPdf(x, k, theta);
+    if (pdf === 0 || !isFinite(pdf)) break;
+    const dx = (cdf - p) / pdf;
+    x -= dx;
+    if (x <= 0) x = 1e-12;
+    if (Math.abs(dx) < 1e-10) break;
+  }
+  return x;
+};
+
+/* === БЕТА-РАСПРЕДЕЛЕНИЕ B(α, β), x ∈ [0, 1] === */
+M.betaPdf = (x, a, b) => {
+  if (x <= 0 || x >= 1 || a <= 0 || b <= 0) return 0;
+  const lpdf = (a - 1)*Math.log(x) + (b - 1)*Math.log(1 - x)
+             + M.logGamma(a + b) - M.logGamma(a) - M.logGamma(b);
+  return Math.exp(lpdf);
+};
+M.betaCdf = (x, a, b) => M.betaI(a, b, x);
+M.betaInv = (p, a, b) => {
+  if (p <= 0) return 0;
+  if (p >= 1) return 1;
+  let x = a / (a + b);
+  for (let i = 0; i < 100; i++) {
+    const cdf = M.betaCdf(x, a, b);
+    const pdf = M.betaPdf(x, a, b);
+    if (pdf === 0 || !isFinite(pdf)) break;
+    let dx = (cdf - p) / pdf;
+    // ограничим шаг чтобы не вылететь из (0, 1)
+    if (x - dx <= 0) dx = x * 0.5;
+    if (x - dx >= 1) dx = -(1 - x) * 0.5;
+    x -= dx;
+    if (Math.abs(dx) < 1e-12) break;
+  }
+  return x;
+};
+
+/* === ЭКСПОНЕНЦИАЛЬНОЕ Exp(λ), x ≥ 0 === */
+M.expPdf = (x, lam) => x < 0 ? 0 : lam * Math.exp(-lam * x);
+M.expCdf = (x, lam) => x < 0 ? 0 : 1 - Math.exp(-lam * x);
+M.expInv = (p, lam) => -Math.log(1 - p) / lam;
+
+/* === РАВНОМЕРНОЕ U(a, b) === */
+M.unifPdf = (x, a, b) => (x < a || x > b) ? 0 : 1 / (b - a);
+M.unifCdf = (x, a, b) => x < a ? 0 : (x > b ? 1 : (x - a)/(b - a));
+M.unifInv = (p, a, b) => a + p * (b - a);
+
+/* === ГЕОМЕТРИЧЕСКОЕ Geom(p), число испытаний до 1-го успеха, k = 1, 2, … === */
+M.geomPmf = (k, p) => {
+  if (k < 1 || !Number.isInteger(k) || p <= 0 || p > 1) return 0;
+  return Math.pow(1 - p, k - 1) * p;
+};
+M.geomCdf = (k, p) => k < 1 ? 0 : 1 - Math.pow(1 - p, Math.floor(k));
+
+/* === ВЗВЕШЕННАЯ СТАТИСТИКА (для дискретного и интервального рядов) === */
+M.wSum = (ns) => ns.reduce((a,b)=>a+b, 0);
+M.wMean = (xs, ns) => {
+  let s = 0, w = 0;
+  for (let i = 0; i < xs.length; i++) { s += xs[i]*ns[i]; w += ns[i]; }
+  return w === 0 ? NaN : s/w;
+};
+M.wVariance = (xs, ns, biased) => {
+  const N = M.wSum(ns);
+  if ((biased && N < 1) || (!biased && N < 2)) return NaN;
+  const m = M.wMean(xs, ns);
+  let s = 0;
+  for (let i = 0; i < xs.length; i++) s += (xs[i]-m)*(xs[i]-m)*ns[i];
+  return biased ? s/N : s/(N-1);
+};
+M.wCentralMoment = (xs, ns, k) => {
+  const N = M.wSum(ns);
+  if (N < 1) return NaN;
+  const m = M.wMean(xs, ns);
+  let s = 0;
+  for (let i = 0; i < xs.length; i++) s += Math.pow(xs[i]-m, k)*ns[i];
+  return s/N;
+};
+M.wSkewness = (xs, ns) => {
+  const sd = Math.sqrt(M.wVariance(xs, ns, true));
+  if (!isFinite(sd) || sd === 0) return NaN;
+  return M.wCentralMoment(xs, ns, 3) / Math.pow(sd, 3);
+};
+M.wKurtosis = (xs, ns) => {
+  const sd = Math.sqrt(M.wVariance(xs, ns, true));
+  if (!isFinite(sd) || sd === 0) return NaN;
+  return M.wCentralMoment(xs, ns, 4) / Math.pow(sd, 4) - 3;
+};
+
+/* === ДИСКРЕТНЫЙ РЯД === */
+/* Мода: значения с максимальной частотой */
+M.discreteMode = (xs, ns) => {
+  if (!xs.length) return [];
+  let max = 0;
+  for (const v of ns) if (v > max) max = v;
+  if (max === 0) return [];
+  const res = [];
+  for (let i = 0; i < xs.length; i++) if (ns[i] === max) res.push(xs[i]);
+  return res.sort((a,b)=>a-b);
+};
+/* Медиана / квантиль: среднее значение, на котором кумулята впервые
+   достигает p·N. При попадании ровно — берётся среднее соседних. */
+M.discreteQuantile = (sortedXs, sortedNs, p) => {
+  const N = M.wSum(sortedNs);
+  if (N === 0) return NaN;
+  const target = p * N;
+  let cum = 0;
+  for (let i = 0; i < sortedXs.length; i++) {
+    cum += sortedNs[i];
+    if (cum > target) return sortedXs[i];
+    if (cum === target && i + 1 < sortedXs.length) return (sortedXs[i] + sortedXs[i+1]) / 2;
+  }
+  return sortedXs[sortedXs.length - 1];
+};
+
+/* === ИНТЕРВАЛЬНЫЙ РЯД ===
+   triples: [{a, b, n}, …], отсортированы по a, желательно стыкующиеся. */
+M.intervalMidpoints = (triples) => triples.map(t => (t.a + t.b)/2);
+M.intervalMean = (triples) => {
+  const xs = M.intervalMidpoints(triples);
+  const ns = triples.map(t => t.n);
+  return M.wMean(xs, ns);
+};
+M.intervalVariance = (triples, biased) => {
+  const xs = M.intervalMidpoints(triples);
+  const ns = triples.map(t => t.n);
+  return M.wVariance(xs, ns, biased);
+};
+M.intervalCentralMoment = (triples, k) => {
+  const xs = M.intervalMidpoints(triples);
+  const ns = triples.map(t => t.n);
+  return M.wCentralMoment(xs, ns, k);
+};
+M.intervalSkewness = (triples) => {
+  const sd = Math.sqrt(M.intervalVariance(triples, true));
+  if (!isFinite(sd) || sd === 0) return NaN;
+  return M.intervalCentralMoment(triples, 3) / Math.pow(sd, 3);
+};
+M.intervalKurtosis = (triples) => {
+  const sd = Math.sqrt(M.intervalVariance(triples, true));
+  if (!isFinite(sd) || sd === 0) return NaN;
+  return M.intervalCentralMoment(triples, 4) / Math.pow(sd, 4) - 3;
+};
+/* Мода интервального ряда: формула с соседними частотами.
+   Mo = x₀ + h · (n_Mo − n_{Mo−1}) / [(n_Mo − n_{Mo−1}) + (n_Mo − n_{Mo+1})] */
+M.intervalMode = (triples) => {
+  if (!triples.length) return NaN;
+  let mi = 0;
+  for (let i = 1; i < triples.length; i++)
+    if (triples[i].n > triples[mi].n) mi = i;
+  const t = triples[mi];
+  const h = t.b - t.a;
+  const nm = t.n;
+  const np = mi > 0 ? triples[mi-1].n : 0;
+  const nn = mi < triples.length-1 ? triples[mi+1].n : 0;
+  const denom = (nm - np) + (nm - nn);
+  if (denom === 0) return (t.a + t.b)/2;
+  return t.a + h * (nm - np) / denom;
+};
+/* Медиана и квартили интервального ряда:
+   x_q = a_q + h · (qN − S_{q−1}) / n_q,
+   где q-й интервал — тот, на котором накопленная частота впервые ≥ qN. */
+M.intervalQuantile = (triples, p) => {
+  if (!triples.length) return NaN;
+  const N = triples.reduce((a, t) => a + t.n, 0);
+  const target = p * N;
+  let cum = 0;
+  for (let i = 0; i < triples.length; i++) {
+    if (cum + triples[i].n >= target) {
+      const t = triples[i];
+      const h = t.b - t.a;
+      return t.a + h * (target - cum) / t.n;
+    }
+    cum += triples[i].n;
+  }
+  return triples[triples.length - 1].b;
+};
+M.intervalMedian = (triples) => M.intervalQuantile(triples, 0.5);
+
+/* ============================================================
+   2. ФОРМАТИРОВАНИЕ
+   ============================================================ */
+function fmt(x, dp) {
+  if (x === null || x === undefined || !isFinite(x)) return '—';
+  if (dp === undefined) dp = 4;
+  if (Math.abs(x) >= 1e15 || (x !== 0 && Math.abs(x) < 1e-6)) {
+    return x.toExponential(Math.max(2, dp - 2));
+  }
+  const r = Number(x.toFixed(dp));
+  // если число большое и целое — без хвоста
+  if (Number.isInteger(r) && Math.abs(r) >= 1) return r.toLocaleString('ru-RU');
+  return r.toString().replace('.', ',');
+}
+function fmtPct(x) {
+  if (!isFinite(x)) return '—';
+  return (x*100).toFixed(2).replace('.', ',') + '%';
+}
+function $(id) { return document.getElementById(id); }
+function setVal(id, v, isErr) {
+  const el = $(id); if (!el) return;
+  el.textContent = v;
+  if (isErr) el.classList.add('error'); else el.classList.remove('error');
+}
+function num(id) { return parseFloat(($(id).value || '').replace(',', '.')); }
+
+/* ============================================================
+   3. ГРАФИКИ НА CANVAS
+   Простой рисователь: оси, сетка, столбцы или линии, маркер.
+   ============================================================ */
+function getCss(name) {
+  return getComputedStyle(document.getElementById('terverApp')).getPropertyValue(name).trim();
+}
+
+function setupCanvas(canvas) {
+  const dpr = window.devicePixelRatio || 1;
+  const w = canvas.clientWidth;
+  const h = canvas.clientHeight;
+  canvas.width  = Math.round(w * dpr);
+  canvas.height = Math.round(h * dpr);
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.scale(dpr, dpr);
+  return { ctx, w, h };
+}
+
+function niceTicks(min, max, count) {
+  const range = max - min;
+  if (range === 0) return [min];
+  const rough = range / count;
+  const mag = Math.pow(10, Math.floor(Math.log10(rough)));
+  const norm = rough / mag;
+  let step;
+  if (norm < 1.5) step = 1*mag;
+  else if (norm < 3) step = 2*mag;
+  else if (norm < 7) step = 5*mag;
+  else step = 10*mag;
+  const start = Math.ceil(min/step)*step;
+  const ticks = [];
+  for (let v = start; v <= max + step*0.0001; v += step) ticks.push(+v.toFixed(12));
+  return ticks;
+}
+
+function tickLabel(v) {
+  if (v === 0) return '0';
+  if (Math.abs(v) >= 1e4 || Math.abs(v) < 1e-3) return v.toExponential(1);
+  const s = (+v.toFixed(6)).toString();
+  return s.replace('.', ',');
+}
+
+/* Базовый рисователь: рисует оси и сетку, возвращает функции преобразования */
+function drawAxes(canvas, opts) {
+  const { ctx, w, h } = setupCanvas(canvas);
+  const padL = opts.padL || 52, padR = opts.padR || 14;
+  const padT = opts.padT || 14, padB = opts.padB || 36;
+  const plotW = w - padL - padR;
+  const plotH = h - padT - padB;
+  const { xMin, xMax, yMin, yMax, xLabel, yLabel } = opts;
+
+  ctx.fillStyle = getCss('--card');
+  ctx.fillRect(0, 0, w, h);
+
+  // сетка
+  const xTicks = opts.xTickValues || niceTicks(xMin, xMax, 8);
+  const yTicks = niceTicks(yMin, yMax, 5);
+  const xToPx = x => padL + (x - xMin) / (xMax - xMin) * plotW;
+  const yToPx = y => padT + plotH - (y - yMin) / (yMax - yMin) * plotH;
+
+  ctx.strokeStyle = getCss('--chart-grid');
+  ctx.lineWidth = 1;
+  for (const y of yTicks) {
+    const py = yToPx(y);
+    ctx.beginPath(); ctx.moveTo(padL, py); ctx.lineTo(padL + plotW, py); ctx.stroke();
+  }
+  for (const x of xTicks) {
+    const px = xToPx(x);
+    ctx.beginPath(); ctx.moveTo(px, padT); ctx.lineTo(px, padT + plotH); ctx.stroke();
+  }
+
+  // оси
+  ctx.strokeStyle = getCss('--chart-axis');
+  ctx.beginPath();
+  ctx.moveTo(padL, padT); ctx.lineTo(padL, padT + plotH); ctx.lineTo(padL + plotW, padT + plotH);
+  ctx.stroke();
+
+  // подписи
+  ctx.fillStyle = getCss('--text');
+  ctx.font = '12px Roboto, "Helvetica Neue", Arial, sans-serif';
+  ctx.textAlign = 'right';
+  ctx.textBaseline = 'middle';
+  for (const y of yTicks) {
+    ctx.fillText(tickLabel(y), padL - 6, yToPx(y));
+  }
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'top';
+  for (const x of xTicks) {
+    ctx.fillText(tickLabel(x), xToPx(x), padT + plotH + 6);
+  }
+  if (xLabel) {
+    ctx.font = 'italic 13px Roboto, "Helvetica Neue", Arial, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'bottom';
+    ctx.fillText(xLabel, padL + plotW/2, h - 2);
+  }
+  if (yLabel) {
+    ctx.save();
+    ctx.translate(12, padT + plotH/2);
+    ctx.rotate(-Math.PI/2);
+    ctx.font = 'italic 13px Roboto, "Helvetica Neue", Arial, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(yLabel, 0, 0);
+    ctx.restore();
+  }
+
+  return { ctx, padL, padR, padT, padB, plotW, plotH, xToPx, yToPx, xMin, xMax, yMin, yMax };
+}
+
+/* Столбчатая диаграмма для P(X=k), k = 0..N */
+function drawBars(canvas, ks, ps, opts) {
+  opts = opts || {};
+  const validP = ps.filter(p => isFinite(p));
+  const yMax = validP.length ? Math.max(...validP) * 1.15 : 1;
+  const xMin = ks.length ? Math.min(...ks) - 0.6 : -0.6;
+  const xMax = ks.length ? Math.max(...ks) + 0.6 : 0.6;
+  // x-метки: только реальные k
+  const xTickValues = ks.length <= 22 ? ks.slice() : niceTicks(Math.min(...ks), Math.max(...ks), 10);
+
+  const A = drawAxes(canvas, {
+    xMin, xMax, yMin: 0, yMax,
+    xLabel: opts.xLabel || 'k',
+    yLabel: opts.yLabel || 'P(X=k)',
+    xTickValues
+  });
+  const { ctx, xToPx, yToPx } = A;
+  const barColor = getCss('--chart-bar');
+  const barHi = getCss('--chart-bar-hi');
+  const barWidth = Math.max(2, ((A.plotW) / Math.max(ks.length, 1)) * 0.7);
+
+  for (let i = 0; i < ks.length; i++) {
+    const k = ks[i], p = ps[i];
+    if (!isFinite(p)) continue;
+    const px = xToPx(k);
+    const py = yToPx(p);
+    const py0 = yToPx(0);
+    ctx.fillStyle = (opts.highlight !== undefined && k === opts.highlight) ? barHi : barColor;
+    ctx.fillRect(px - barWidth/2, py, barWidth, py0 - py);
+  }
+}
+
+/* Линия y=f(x) на [xMin, xMax] */
+function drawCurve(canvas, fn, opts) {
+  opts = opts || {};
+  const N = 400;
+  const xMin = opts.xMin, xMax = opts.xMax;
+  const xs = [], ys = [];
+  let yMaxAuto = 0;
+  for (let i = 0; i <= N; i++) {
+    const x = xMin + (xMax - xMin) * i / N;
+    const y = fn(x);
+    xs.push(x); ys.push(y);
+    if (isFinite(y) && y > yMaxAuto) yMaxAuto = y;
+  }
+  let yMin = opts.yMin !== undefined ? opts.yMin : 0;
+  let yMax = opts.yMax !== undefined ? opts.yMax : yMaxAuto * 1.1;
+  if (yMax === 0) yMax = 1;
+
+  const A = drawAxes(canvas, {
+    xMin, xMax, yMin, yMax,
+    xLabel: opts.xLabel || 'x',
+    yLabel: opts.yLabel || 'f(x)'
+  });
+  const { ctx, xToPx, yToPx } = A;
+  const lineCol = getCss('--chart-line');
+  const fillCol = getCss('--chart-fill');
+
+  // заполнение под кривой
+  if (opts.fill !== false) {
+    ctx.fillStyle = fillCol;
+    ctx.beginPath();
+    ctx.moveTo(xToPx(xs[0]), yToPx(0));
+    for (let i = 0; i < xs.length; i++) {
+      ctx.lineTo(xToPx(xs[i]), yToPx(Math.max(yMin, Math.min(yMax, ys[i] || 0))));
+    }
+    ctx.lineTo(xToPx(xs[xs.length-1]), yToPx(0));
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  // линия
+  ctx.strokeStyle = lineCol;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  let started = false;
+  for (let i = 0; i < xs.length; i++) {
+    const y = ys[i];
+    if (!isFinite(y)) { started = false; continue; }
+    const px = xToPx(xs[i]), py = yToPx(Math.max(yMin, Math.min(yMax, y)));
+    if (!started) { ctx.moveTo(px, py); started = true; } else { ctx.lineTo(px, py); }
+  }
+  ctx.stroke();
+
+  // закраска критической области
+  if (opts.shadeFrom !== undefined) {
+    const from = opts.shadeFrom;
+    const shadeCol = getCss('--chart-marker') + '33'; // 33 alpha hex (~20%)
+    ctx.fillStyle = shadeCol;
+    ctx.beginPath();
+    ctx.moveTo(xToPx(Math.max(from, xMin)), yToPx(0));
+    for (let i = 0; i < xs.length; i++) {
+      if (xs[i] < from) continue;
+      ctx.lineTo(xToPx(xs[i]), yToPx(Math.max(yMin, Math.min(yMax, ys[i] || 0))));
+    }
+    ctx.lineTo(xToPx(xMax), yToPx(0));
+    ctx.closePath();
+    ctx.fill();
+  }
+  if (opts.shadeAbsFrom !== undefined) {
+    const from = opts.shadeAbsFrom;
+    const shadeCol = getCss('--chart-marker') + '33';
+    ctx.fillStyle = shadeCol;
+    // правый хвост
+    ctx.beginPath();
+    ctx.moveTo(xToPx(Math.max(from, xMin)), yToPx(0));
+    for (let i = 0; i < xs.length; i++) {
+      if (xs[i] < from) continue;
+      ctx.lineTo(xToPx(xs[i]), yToPx(Math.max(yMin, Math.min(yMax, ys[i] || 0))));
+    }
+    ctx.lineTo(xToPx(xMax), yToPx(0));
+    ctx.closePath();
+    ctx.fill();
+    // левый хвост
+    ctx.beginPath();
+    ctx.moveTo(xToPx(xMin), yToPx(0));
+    for (let i = 0; i < xs.length; i++) {
+      if (xs[i] > -from) break;
+      ctx.lineTo(xToPx(xs[i]), yToPx(Math.max(yMin, Math.min(yMax, ys[i] || 0))));
+    }
+    ctx.lineTo(xToPx(Math.min(-from, xMax)), yToPx(0));
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  // вертикальный маркер
+  if (opts.marker !== undefined && isFinite(opts.marker)) {
+    const xv = opts.marker;
+    if (xv >= xMin && xv <= xMax) {
+      const px = xToPx(xv);
+      const yv = isFinite(opts.markerY) ? opts.markerY : fn(xv);
+      const py = yToPx(Math.max(yMin, Math.min(yMax, yv || 0)));
+      ctx.strokeStyle = getCss('--chart-marker');
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([4, 3]);
+      ctx.beginPath();
+      ctx.moveTo(px, yToPx(0));
+      ctx.lineTo(px, py);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      // точка
+      ctx.fillStyle = getCss('--chart-marker');
+      ctx.beginPath();
+      ctx.arc(px, py, 3.5, 0, 2*Math.PI);
+      ctx.fill();
+    }
+  }
+}
+
+/* === Парсер свободного формата ввода === */
+function parseData(text) {
+  if (!text) return [];
+  // Извлекаем все числовые подстроки, поддерживая запятую как десятичный
+  const re = /-?\d+(?:[.,]\d+)?(?:[eE][+\-]?\d+)?/g;
+  const matches = text.match(re) || [];
+  return matches.map(s => parseFloat(s.replace(',', '.'))).filter(x => isFinite(x));
+}
+
+/* === Ступенчатая линия для эмпирической функции распределения === */
+function drawSteps(canvas, sortedXs, opts) {
+  opts = opts || {};
+  const n = sortedXs.length;
+  if (n === 0) {
+    drawAxes(canvas, { xMin: 0, xMax: 1, yMin: 0, yMax: 1, xLabel: 'x', yLabel: 'F*(x)' });
+    return;
+  }
+  // точки: уникальные значения и кумулятивные доли (правый предел)
+  const points = [];
+  let i = 0;
+  while (i < n) {
+    let j = i;
+    while (j < n && sortedXs[j] === sortedXs[i]) j++;
+    points.push({ x: sortedXs[i], y: j / n });
+    i = j;
+  }
+  const range = sortedXs[n-1] - sortedXs[0] || 1;
+  const xMin = sortedXs[0] - range * 0.1;
+  const xMax = sortedXs[n-1] + range * 0.1;
+
+  const A = drawAxes(canvas, {
+    xMin, xMax, yMin: 0, yMax: 1.05,
+    xLabel: opts.xLabel || 'x', yLabel: opts.yLabel || 'F*(x)'
+  });
+  const ctx = A.ctx;
+
+  // ступеньки
+  ctx.strokeStyle = getCss('--chart-line');
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(A.xToPx(xMin), A.yToPx(0));
+  ctx.lineTo(A.xToPx(points[0].x), A.yToPx(0));
+  let prevY = 0;
+  for (const p of points) {
+    ctx.lineTo(A.xToPx(p.x), A.yToPx(p.y)); // вертикальный скачок
+    prevY = p.y;
+  }
+  ctx.lineTo(A.xToPx(xMax), A.yToPx(prevY));
+  ctx.stroke();
+
+  // точки скачков
+  ctx.fillStyle = getCss('--chart-line');
+  for (const p of points) {
+    ctx.beginPath();
+    ctx.arc(A.xToPx(p.x), A.yToPx(p.y), 3, 0, 2*Math.PI);
+    ctx.fill();
+  }
+}
+
+/* === Ступенчатая ЭФР для взвешенных данных (xᵢ с частотами nᵢ) === */
+function drawStepsWeighted(canvas, sortedXs, ns, opts) {
+  opts = opts || {};
+  const N = ns.reduce((a,b)=>a+b, 0);
+  if (!sortedXs.length || N === 0) {
+    drawAxes(canvas, { xMin: 0, xMax: 1, yMin: 0, yMax: 1.05, xLabel: 'x', yLabel: 'F*(x)' });
+    return;
+  }
+  const points = []; let cum = 0;
+  for (let i = 0; i < sortedXs.length; i++) {
+    cum += ns[i];
+    points.push({ x: sortedXs[i], y: cum / N });
+  }
+  const range = (sortedXs[sortedXs.length-1] - sortedXs[0]) || 1;
+  const xMin = sortedXs[0] - range * 0.1;
+  const xMax = sortedXs[sortedXs.length-1] + range * 0.1;
+  const A = drawAxes(canvas, {
+    xMin, xMax, yMin: 0, yMax: 1.05,
+    xLabel: opts.xLabel || 'x', yLabel: opts.yLabel || 'F*(x)'
+  });
+  const ctx = A.ctx;
+  ctx.strokeStyle = getCss('--chart-line'); ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(A.xToPx(xMin), A.yToPx(0));
+  ctx.lineTo(A.xToPx(points[0].x), A.yToPx(0));
+  let prev = 0;
+  for (const p of points) {
+    ctx.lineTo(A.xToPx(p.x), A.yToPx(p.y));
+    prev = p.y;
+  }
+  ctx.lineTo(A.xToPx(xMax), A.yToPx(prev));
+  ctx.stroke();
+  ctx.fillStyle = getCss('--chart-line');
+  for (const p of points) {
+    ctx.beginPath(); ctx.arc(A.xToPx(p.x), A.yToPx(p.y), 3, 0, 2*Math.PI); ctx.fill();
+  }
+}
+
+/* === Кумулята (ломаная ЭФР) для интервального ряда === */
+function drawEdfInterval(canvas, triples, opts) {
+  opts = opts || {};
+  if (!triples.length) {
+    drawAxes(canvas, { xMin: 0, xMax: 1, yMin: 0, yMax: 1.05, xLabel: 'x', yLabel: 'F*(x)' });
+    return;
+  }
+  const N = triples.reduce((a,t)=>a+t.n, 0);
+  const xLo = triples[0].a, xHi = triples[triples.length-1].b;
+  const pad = (xHi - xLo) * 0.05 || 1;
+  const xMin = xLo - pad, xMax = xHi + pad;
+  const A = drawAxes(canvas, {
+    xMin, xMax, yMin: 0, yMax: 1.05,
+    xLabel: opts.xLabel || 'x', yLabel: opts.yLabel || 'F*(x)'
+  });
+  const ctx = A.ctx;
+  ctx.strokeStyle = getCss('--chart-line'); ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(A.xToPx(xMin), A.yToPx(0));
+  ctx.lineTo(A.xToPx(triples[0].a), A.yToPx(0));
+  let cum = 0;
+  for (const t of triples) {
+    cum += t.n;
+    ctx.lineTo(A.xToPx(t.b), A.yToPx(cum / N));
+  }
+  ctx.lineTo(A.xToPx(xMax), A.yToPx(cum / N));
+  ctx.stroke();
+  ctx.fillStyle = getCss('--chart-line');
+  ctx.beginPath(); ctx.arc(A.xToPx(triples[0].a), A.yToPx(0), 3, 0, 2*Math.PI); ctx.fill();
+  let c2 = 0;
+  for (const t of triples) {
+    c2 += t.n;
+    ctx.beginPath(); ctx.arc(A.xToPx(t.b), A.yToPx(c2/N), 3, 0, 2*Math.PI); ctx.fill();
+  }
+}
+
+/* === Гистограмма по непрерывным интервалам === */
+function drawHist(canvas, edges, freqs, opts) {
+  opts = opts || {};
+  const yMaxAuto = freqs.length ? Math.max(...freqs) * 1.15 : 1;
+  const xMin = edges[0];
+  const xMax = edges[edges.length - 1];
+  const A = drawAxes(canvas, {
+    xMin: xMin - (xMax - xMin)*0.03,
+    xMax: xMax + (xMax - xMin)*0.03,
+    yMin: 0, yMax: yMaxAuto,
+    xLabel: opts.xLabel || 'x',
+    yLabel: opts.yLabel || 'Частота'
+  });
+  const ctx = A.ctx;
+  ctx.fillStyle = getCss('--chart-bar');
+  ctx.strokeStyle = getCss('--card');
+  ctx.lineWidth = 1;
+  for (let k = 0; k < freqs.length; k++) {
+    const x0 = A.xToPx(edges[k]), x1 = A.xToPx(edges[k+1]);
+    const y0 = A.yToPx(0), y1 = A.yToPx(freqs[k]);
+    ctx.fillRect(x0, y1, x1 - x0, y0 - y1);
+    ctx.strokeRect(x0, y1, x1 - x0, y0 - y1);
+  }
+}
+
+/* === Полигон: ломаная по дискретным точкам (x, частота) === */
+function drawPolygon(canvas, xs, ys, opts) {
+  opts = opts || {};
+  if (xs.length === 0) {
+    drawAxes(canvas, { xMin: 0, xMax: 1, yMin: 0, yMax: 1, xLabel: 'x', yLabel: 'Частота' });
+    return;
+  }
+  const xMin = Math.min(...xs);
+  const xMax = Math.max(...xs);
+  const range = (xMax - xMin) || 1;
+  const yMaxAuto = Math.max(...ys) * 1.15;
+  const A = drawAxes(canvas, {
+    xMin: xMin - range*0.1, xMax: xMax + range*0.1,
+    yMin: 0, yMax: yMaxAuto,
+    xLabel: opts.xLabel || 'x',
+    yLabel: opts.yLabel || 'Частота'
+  });
+  const ctx = A.ctx;
+  // линия
+  ctx.strokeStyle = getCss('--chart-line');
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  for (let i = 0; i < xs.length; i++) {
+    const px = A.xToPx(xs[i]), py = A.yToPx(ys[i]);
+    if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+  }
+  ctx.stroke();
+  // точки
+  ctx.fillStyle = getCss('--chart-line');
+  for (let i = 0; i < xs.length; i++) {
+    ctx.beginPath();
+    ctx.arc(A.xToPx(xs[i]), A.yToPx(ys[i]), 3.5, 0, 2*Math.PI);
+    ctx.fill();
+  }
+}
+
+/* === Сравнительная диаграмма: наблюдаемые бары + теоретические точки/линия === */
+function drawCompareBars(canvas, xs, observed, expected, opts) {
+  opts = opts || {};
+  if (!xs.length) {
+    drawAxes(canvas, { xMin: 0, xMax: 1, yMin: 0, yMax: 1, xLabel: 'x', yLabel: 'Частота' });
+    return;
+  }
+  const yMaxAuto = Math.max(
+    Math.max(...observed.filter(isFinite)),
+    Math.max(...expected.filter(isFinite))
+  ) * 1.15 || 1;
+  const xMin = Math.min(...xs) - 0.6;
+  const xMax = Math.max(...xs) + 0.6;
+  const xTickValues = xs.length <= 20 ? xs.slice() : niceTicks(Math.min(...xs), Math.max(...xs), 10);
+  const A = drawAxes(canvas, {
+    xMin, xMax, yMin: 0, yMax: yMaxAuto,
+    xLabel: opts.xLabel || 'x', yLabel: opts.yLabel || 'Частота',
+    xTickValues
+  });
+  const ctx = A.ctx;
+  const w = Math.max(2, (A.plotW / Math.max(xs.length, 1)) * 0.6);
+  // наблюдаемые бары
+  ctx.fillStyle = getCss('--chart-bar');
+  for (let i = 0; i < xs.length; i++) {
+    if (!isFinite(observed[i])) continue;
+    const px = A.xToPx(xs[i]);
+    const py = A.yToPx(observed[i]);
+    const py0 = A.yToPx(0);
+    ctx.fillRect(px - w/2, py, w, py0 - py);
+  }
+  // теоретические точки + ломаная
+  ctx.strokeStyle = getCss('--chart-marker');
+  ctx.fillStyle = getCss('--chart-marker');
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  let started = false;
+  for (let i = 0; i < xs.length; i++) {
+    if (!isFinite(expected[i])) continue;
+    const px = A.xToPx(xs[i]);
+    const py = A.yToPx(expected[i]);
+    if (!started) { ctx.moveTo(px, py); started = true; } else { ctx.lineTo(px, py); }
+  }
+  ctx.stroke();
+  for (let i = 0; i < xs.length; i++) {
+    if (!isFinite(expected[i])) continue;
+    ctx.beginPath();
+    ctx.arc(A.xToPx(xs[i]), A.yToPx(expected[i]), 3.5, 0, 2*Math.PI);
+    ctx.fill();
+  }
+}
+
+/* === Гистограмма + теоретическая плотность поверх (для непрерывных дистр.) === */
+function drawHistWithCurve(canvas, edges, freqs, fn, N, opts) {
+  opts = opts || {};
+  // нормализация плотности к шкале частот: f(x)·N·h_i — высота, эквивалентная частоте
+  // используем равные интервалы (h одинаковый), для интервального ряда h может быть разным
+  // → вычислим h_i на каждом интервале и масштабируем плотность отдельно
+  const yMaxAuto = Math.max(...freqs.filter(isFinite)) * 1.15 || 1;
+  const xMin = edges[0] - (edges[edges.length-1] - edges[0]) * 0.05;
+  const xMax = edges[edges.length-1] + (edges[edges.length-1] - edges[0]) * 0.05;
+  const A = drawAxes(canvas, {
+    xMin, xMax, yMin: 0, yMax: yMaxAuto,
+    xLabel: opts.xLabel || 'x', yLabel: opts.yLabel || 'Частота'
+  });
+  const ctx = A.ctx;
+  // бары
+  ctx.fillStyle = getCss('--chart-bar');
+  ctx.strokeStyle = getCss('--card');
+  for (let k = 0; k < freqs.length; k++) {
+    const x0 = A.xToPx(edges[k]), x1 = A.xToPx(edges[k+1]);
+    const y0 = A.yToPx(0), y1 = A.yToPx(freqs[k]);
+    ctx.fillRect(x0, y1, x1 - x0, y0 - y1);
+    ctx.strokeRect(x0, y1, x1 - x0, y0 - y1);
+  }
+  // теоретическая кривая: высота = f(x) · N · h_среднее
+  // (для удобства возьмём средний h)
+  const hAvg = (edges[edges.length-1] - edges[0]) / freqs.length;
+  ctx.strokeStyle = getCss('--chart-marker');
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  const STEPS = 200;
+  let started = false;
+  for (let i = 0; i <= STEPS; i++) {
+    const x = edges[0] + (edges[edges.length-1] - edges[0]) * i / STEPS;
+    const y = fn(x) * N * hAvg;
+    if (!isFinite(y)) { started = false; continue; }
+    const py = A.yToPx(Math.min(y, yMaxAuto));
+    const px = A.xToPx(x);
+    if (!started) { ctx.moveTo(px, py); started = true; } else { ctx.lineTo(px, py); }
+  }
+  ctx.stroke();
+}
+
+/* === Группировка значений по уникальным элементам с частотами === */
+function frequencies(xs) {
+  const map = new Map();
+  for (const x of xs) map.set(x, (map.get(x) || 0) + 1);
+  const arr = [];
+  for (const [k, v] of map) arr.push({ x: k, f: v });
+  arr.sort((a, b) => a.x - b.x);
+  return arr;
+}
+
+/* === Помощник: поповер справки === */
+function makeHelp(text, formula) {
+  const t = (text || '').replace(/"/g, '&quot;');
+  const f = (formula || '').replace(/"/g, '&quot;');
+  return `<span class="tv-help-icon" data-help="${t}" data-formula="${f}">?</span>`;
+}
+
+/* === ОПИСАНИЕ РАСПРЕДЕЛЕНИЙ ДЛЯ КРИТЕРИЯ ПИРСОНА === */
+const DISTRIBUTIONS = {
+  normal: {
+    label: 'Нормальное N(μ, σ)',
+    desc: 'Параметры μ — мат.ожидание, σ — стандартное отклонение. Метод моментов: μ̂ = x̄, σ̂ = s.',
+    isDiscrete: false,
+    params: [
+      { name: 'mu',    label: 'μ',    def: 0, step: 0.01, estimable: true },
+      { name: 'sigma', label: 'σ',    def: 1, step: 0.01, min: 1e-9, estimable: true }
+    ],
+    cdf: (x, p) => M.normCdf(x, p.mu, p.sigma),
+    pdf: (x, p) => M.normPdf(x, p.mu, p.sigma),
+    estimate: (s) => ({ mu: s.mean, sigma: Math.sqrt(Math.max(s.varS, 1e-12)) })
+  },
+  uniform: {
+    label: 'Равномерное U(a, b)',
+    desc: 'Параметры a, b — границы. Метод моментов: â = x̄ − √(3·D), b̂ = x̄ + √(3·D).',
+    isDiscrete: false,
+    params: [
+      { name: 'a', label: 'a', def: 0,  step: 0.01, estimable: true },
+      { name: 'b', label: 'b', def: 1,  step: 0.01, estimable: true }
+    ],
+    cdf: (x, p) => M.unifCdf(x, p.a, p.b),
+    pdf: (x, p) => M.unifPdf(x, p.a, p.b),
+    estimate: (s) => {
+      const r = Math.sqrt(3 * Math.max(s.varB, 0));
+      return { a: s.mean - r, b: s.mean + r };
+    }
+  },
+  expdist: {
+    label: 'Экспоненциальное Exp(λ)',
+    desc: 'Параметр интенсивности λ. Метод моментов: λ̂ = 1 ⁄ x̄.',
+    isDiscrete: false,
+    params: [
+      { name: 'lam', label: 'λ', def: 1, step: 0.01, min: 1e-9, estimable: true }
+    ],
+    cdf: (x, p) => M.expCdf(x, p.lam),
+    pdf: (x, p) => M.expPdf(x, p.lam),
+    estimate: (s) => ({ lam: s.mean > 0 ? 1 / s.mean : 1 })
+  },
+  poisson: {
+    label: 'Пуассона Pois(λ)',
+    desc: 'Параметр λ — среднее число событий. Метод моментов: λ̂ = x̄.',
+    isDiscrete: true,
+    params: [
+      { name: 'lam', label: 'λ', def: 1, step: 0.01, min: 1e-9, estimable: true }
+    ],
+    pmf: (k, p) => M.poissonPmf(k, p.lam),
+    estimate: (s) => ({ lam: s.mean })
+  },
+  binom: {
+    label: 'Биномиальное Bin(n, p)',
+    desc: 'n — число испытаний (известно), p̂ = x̄ ⁄ n.',
+    isDiscrete: true,
+    params: [
+      { name: 'n', label: 'n', def: 10,  step: 1, min: 1, estimable: false, integer: true },
+      { name: 'p', label: 'p', def: 0.5, step: 0.001, min: 0, max: 1, estimable: true }
+    ],
+    pmf: (k, p) => M.binomPmf(k, p.n, p.p),
+    estimate: (s, prev) => ({ n: prev.n, p: prev.n > 0 ? Math.min(1, Math.max(0, s.mean / prev.n)) : 0 })
+  },
+  geom: {
+    label: 'Геометрическое Geom(p)',
+    desc: 'X — номер первого успеха, k = 1, 2, … Метод моментов: p̂ = 1 ⁄ x̄.',
+    isDiscrete: true,
+    params: [
+      { name: 'p', label: 'p', def: 0.5, step: 0.001, min: 1e-9, max: 1, estimable: true }
+    ],
+    pmf: (k, p) => M.geomPmf(k, p.p),
+    estimate: (s) => ({ p: s.mean > 0 ? Math.min(1, 1 / s.mean) : 0.5 })
+  }
+};
+
+/* === buildBins: формирует расчётную таблицу для критерия Пирсона === */
+function buildBins(mode, data, dist, params, nBinsManual) {
+  const N = mode === 'raw'      ? data.xs.length
+          : mode === 'discrete' ? data.pairs.reduce((a,p)=>a+p.n, 0)
+          :                       data.tris.reduce((a,t)=>a+t.n, 0);
+  if (N === 0) return { error: 'Нет данных.' };
+
+  if (dist.isDiscrete) {
+    if (mode === 'interval') return { error: 'Дискретное распределение несовместимо с интервальным рядом — переключите режим ввода.' };
+    let pairs;
+    if (mode === 'raw') {
+      pairs = frequencies(data.xs).map(p => ({ x: p.x, n: p.f }));
+    } else {
+      pairs = data.pairs.slice().sort((a,b) => a.x - b.x);
+    }
+    const rows = [];
+    let pSum = 0;
+    for (const p of pairs) {
+      const pi = dist.pmf(p.x, params);
+      pSum += pi;
+      rows.push({ label: 'X = ' + fmt(p.x, 4), n: p.n, pi, np: N * pi, x: p.x });
+    }
+    const tail = 1 - pSum;
+    if (tail > 1e-9) rows.push({ label: 'другие значения', n: 0, pi: tail, np: N * tail, x: NaN });
+    return { rows, N };
+  }
+
+  // непрерывное
+  if (mode === 'discrete') return { error: 'Непрерывное распределение несовместимо с дискретным рядом — переключите режим ввода.' };
+  let edges, ns;
+  if (mode === 'raw') {
+    const xs = data.xs;
+    let nBins = nBinsManual;
+    if (!Number.isInteger(nBins) || nBins < 1)
+      nBins = Math.max(2, Math.round(1 + Math.log2(xs.length)));
+    const lo = Math.min(...xs), hi = Math.max(...xs);
+    const range = (hi - lo) || 1;
+    const h = range / nBins;
+    edges = []; for (let i = 0; i <= nBins; i++) edges.push(lo + i * h);
+    ns = new Array(nBins).fill(0);
+    for (const x of xs) {
+      let kk = Math.floor((x - lo) / h);
+      if (kk >= nBins) kk = nBins - 1;
+      if (kk < 0) kk = 0;
+      ns[kk]++;
+    }
+  } else {
+    edges = [data.tris[0].a]; for (const t of data.tris) edges.push(t.b);
+    ns = data.tris.map(t => t.n);
+  }
+  const m = ns.length;
+  const rows = [];
+  for (let i = 0; i < m; i++) {
+    const lo = i === 0       ? -Infinity : edges[i];
+    const hi = i === m - 1   ? +Infinity : edges[i + 1];
+    const Flo = isFinite(lo) ? dist.cdf(lo, params) : 0;
+    const Fhi = isFinite(hi) ? dist.cdf(hi, params) : 1;
+    const pi = Math.max(0, Fhi - Flo);
+    const labelLo = i === 0     ? '−∞' : fmt(lo, 4);
+    const labelHi = i === m - 1 ? '+∞' : fmt(hi, 4);
+    rows.push({
+      label: '[' + labelLo + '; ' + labelHi + ')',
+      n: ns[i], pi, np: N * pi,
+      a: edges[i], b: edges[i + 1], x: (edges[i] + edges[i + 1]) / 2
+    });
+  }
+  return { rows, N, edges, ns };
+}
+
+/* === mergeBins: объединяет соседние строки, пока Npᵢ < threshold === */
+function mergeBins(rows, threshold) {
+  threshold = threshold || 5;
+  const out = [];
+  for (const r of rows) {
+    if (out.length === 0) { out.push(Object.assign({}, r)); continue; }
+    const last = out[out.length - 1];
+    if (last.np < threshold) {
+      last.label = last.label + ' ∪ ' + r.label;
+      last.n  += r.n;
+      last.np += r.np;
+      last.pi  = (last.pi || 0) + (r.pi || 0);
+    } else {
+      out.push(Object.assign({}, r));
+    }
+  }
+  if (out.length >= 2 && out[out.length - 1].np < threshold) {
+    const last = out.pop();
+    const prev = out[out.length - 1];
+    prev.label = prev.label + ' ∪ ' + last.label;
+    prev.n  += last.n;
+    prev.np += last.np;
+    prev.pi  = (prev.pi || 0) + (last.pi || 0);
+  }
+  return out;
+}
+
+/* ============================================================
+   4. КАЛЬКУЛЯТОРЫ
+   ============================================================ */
+
+const PAGES = [
+  /* ----------------------------------------------------- 1 */
+  {
+    id: 'fact',
+    nav: '1. Факториал',
+    title: 'Вычисление факториала',
+    desc: 'Произведение всех натуральных чисел от 1 до n. Принято: 0! = 1.',
+    formula: '<i>n</i>! = 1 · 2 · 3 · … · <i>n</i>',
+    html: `
+      <div class="tv-inputs">
+        <div class="tv-input"><label>n (целое 0…170)</label><input type="number" id="f1-n" min="0" max="170" step="1" value="5"></div>
+      </div>
+      <div class="tv-results">
+        <div class="tv-result"><div class="tv-rlabel">n!</div><div class="tv-rval" id="f1-out">—</div></div>
+      </div>
+    `,
+    init() {
+      const compute = () => {
+        const n = num('f1-n');
+        if (!isFinite(n) || n < 0 || n > 170 || !Number.isInteger(n)) {
+          setVal('f1-out', 'Введите целое 0 ≤ n ≤ 170', true); return;
+        }
+        const r = M.fact(n);
+        setVal('f1-out', n <= 20 ? r.toLocaleString('ru-RU') : r.toExponential(8));
+      };
+      $('f1-n').addEventListener('input', compute);
+      compute();
+    }
+  },
+  /* ----------------------------------------------------- 2 */
+  {
+    id: 'comb',
+    nav: '2. Сочетания и размещения',
+    title: 'Сочетания и размещения',
+    desc: 'Число способов выбрать k элементов из n: без учёта порядка (сочетания) и с учётом (размещения).',
+    formula: 'C<sub>n</sub><sup>k</sup> = n! ⁄ ( k!·(n−k)! );&nbsp;&nbsp;&nbsp;A<sub>n</sub><sup>k</sup> = n! ⁄ (n−k)!',
+    html: `
+      <div class="tv-inputs">
+        <div class="tv-input"><label>n (всего)</label><input type="number" id="f2-n" min="0" step="1" value="6"></div>
+        <div class="tv-input"><label>k (выбираем)</label><input type="number" id="f2-k" min="0" step="1" value="2"></div>
+      </div>
+      <div class="tv-results">
+        <div class="tv-result"><div class="tv-rlabel">Сочетания C(n,k)</div><div class="tv-rval" id="f2-c">—</div></div>
+        <div class="tv-result"><div class="tv-rlabel">Размещения A(n,k)</div><div class="tv-rval" id="f2-a">—</div></div>
+      </div>
+    `,
+    init() {
+      const compute = () => {
+        const n = num('f2-n'), k = num('f2-k');
+        if (!Number.isInteger(n) || !Number.isInteger(k) || n < 0 || k < 0 || k > n) {
+          setVal('f2-c', 'Нужно 0 ≤ k ≤ n (целые)', true);
+          setVal('f2-a', '—'); return;
+        }
+        setVal('f2-c', M.combin(n, k).toLocaleString('ru-RU'));
+        setVal('f2-a', M.perm(n, k).toLocaleString('ru-RU'));
+      };
+      $('f2-n').addEventListener('input', compute);
+      $('f2-k').addEventListener('input', compute);
+      compute();
+    }
+  },
+  /* ----------------------------------------------------- 3 */
+  {
+    id: 'bern',
+    nav: '3. Формула Бернулли',
+    title: 'Формула Бернулли',
+    desc: 'Вероятность ровно k успехов в n независимых испытаниях с одинаковой вероятностью успеха p.',
+    formula: 'P<sub>n</sub>(k) = C<sub>n</sub><sup>k</sup> · p<sup>k</sup> · (1−p)<sup>n−k</sup>',
+    html: `
+      <div class="tv-inputs">
+        <div class="tv-input"><label>n (число испытаний)</label><input type="number" id="f3-n" min="0" step="1" value="10"></div>
+        <div class="tv-input"><label>k (число успехов)</label><input type="number" id="f3-k" min="0" step="1" value="3"></div>
+        <div class="tv-input"><label>p (0…1)</label><input type="number" id="f3-p" min="0" max="1" step="0.01" value="0.4"></div>
+      </div>
+      <div class="tv-results">
+        <div class="tv-result"><div class="tv-rlabel">P(X = k)</div><div class="tv-rval" id="f3-out">—</div></div>
+      </div>
+      <div class="tv-chart"><canvas id="f3-canvas"></canvas><p class="tv-chart-title">Биномиальное распределение P(X=i), выделена точка i = k</p></div>
+    `,
+    init() {
+      const compute = () => {
+        const n = num('f3-n'), k = num('f3-k'), p = num('f3-p');
+        if (!Number.isInteger(n) || !Number.isInteger(k) || n < 0 || k < 0 || k > n
+            || !isFinite(p) || p < 0 || p > 1) {
+          setVal('f3-out', 'Проверьте входные данные', true);
+          return;
+        }
+        setVal('f3-out', fmt(M.binomPmf(k, n, p), 6));
+        const ks = [], ps = [];
+        const limit = Math.min(n, 50);
+        for (let i = 0; i <= limit; i++) { ks.push(i); ps.push(M.binomPmf(i, n, p)); }
+        drawBars($('f3-canvas'), ks, ps, { highlight: k });
+      };
+      ['f3-n','f3-k','f3-p'].forEach(i => $(i).addEventListener('input', compute));
+      this.compute = compute;
+      compute();
+    }
+  },
+  /* ----------------------------------------------------- 4 */
+  {
+    id: 'phi',
+    nav: '4. Функция φ(x)',
+    title: 'Стандартная нормальная плотность φ(x)',
+    desc: 'Плотность вероятности стандартного нормального распределения N(0,1).',
+    formula: 'φ(x) = ( 1 ⁄ √(2π) ) · e<sup>−x²⁄2</sup>',
+    html: `
+      <div class="tv-inputs">
+        <div class="tv-input"><label>x</label><input type="number" id="f4-x" step="0.01" value="0.5"></div>
+      </div>
+      <div class="tv-results">
+        <div class="tv-result"><div class="tv-rlabel">φ(x)</div><div class="tv-rval" id="f4-out">—</div></div>
+      </div>
+      <div class="tv-chart"><canvas id="f4-canvas"></canvas><p class="tv-chart-title">График φ(x) с вертикальным маркером выбранного x</p></div>
+    `,
+    init() {
+      const compute = () => {
+        const x = num('f4-x');
+        if (!isFinite(x)) { setVal('f4-out', '—', true); return; }
+        const v = M.normPdf(x, 0, 1);
+        setVal('f4-out', fmt(v, 4));
+        drawCurve($('f4-canvas'), t => M.normPdf(t,0,1), {
+          xMin: -4, xMax: 4, yMin: 0, yMax: 0.45,
+          xLabel: 'x', yLabel: 'φ(x)', marker: x
+        });
+      };
+      $('f4-x').addEventListener('input', compute);
+      compute();
+    }
+  },
+  /* ----------------------------------------------------- 5 */
+  {
+    id: 'laplace',
+    nav: '5. Функция Лапласа Φ(x)',
+    title: 'Функция Лапласа Φ(x)',
+    desc: 'Φ(x) = ∫₀ˣ φ(t)dt — интеграл Лапласа от плотности стандартного нормального распределения.',
+    formula: 'Φ(x) = ( 1 ⁄ √(2π) ) · ∫<sub>0</sub><sup>x</sup> e<sup>−t²⁄2</sup> dt',
+    html: `
+      <p class="tv-help">В Excel-калькуляторе использована формула: <b>Φ(x) = NORMSDIST(x) − 0,5</b>. Свойства: Φ(0)=0; Φ(−x)=−Φ(x); Φ(+∞)=0,5.</p>
+      <div class="tv-inputs">
+        <div class="tv-input"><label>x</label><input type="number" id="f5-x" step="0.01" value="1.96"></div>
+      </div>
+      <div class="tv-results">
+        <div class="tv-result"><div class="tv-rlabel">Φ(x)</div><div class="tv-rval" id="f5-out">—</div></div>
+      </div>
+      <div class="tv-chart"><canvas id="f5-canvas"></canvas><p class="tv-chart-title">Кривая Φ(x), маркер на выбранном x</p></div>
+    `,
+    init() {
+      const compute = () => {
+        const x = num('f5-x');
+        if (!isFinite(x)) { setVal('f5-out', '—', true); return; }
+        const v = M.normCdf(x,0,1) - 0.5;
+        setVal('f5-out', fmt(v, 4));
+        drawCurve($('f5-canvas'), t => M.normCdf(t,0,1) - 0.5, {
+          xMin: -4, xMax: 4, yMin: -0.5, yMax: 0.5,
+          xLabel: 'x', yLabel: 'Φ(x)',
+          fill: false, marker: x, markerY: M.normCdf(x,0,1) - 0.5
+        });
+      };
+      $('f5-x').addEventListener('input', compute);
+      compute();
+    }
+  },
+  /* ----------------------------------------------------- 5* */
+  {
+    id: 'invlap',
+    nav: '5*. Обратная функция Лапласа',
+    title: 'Обратная функция Лапласа',
+    desc: 'По известному значению Φ(x) найти аргумент x.',
+    formula: 'x = Φ<sup>−1</sup>(p) (NORMSINV(p + 0,5))',
+    html: `
+      <p class="tv-help">Введите значение функции Лапласа Φ. Допустимый диапазон: −0,5 &lt; Φ &lt; 0,5.</p>
+      <div class="tv-inputs">
+        <div class="tv-input"><label>Φ</label><input type="number" id="f5i-p" step="0.001" value="0.475"></div>
+      </div>
+      <div class="tv-results">
+        <div class="tv-result"><div class="tv-rlabel">x</div><div class="tv-rval" id="f5i-out">—</div></div>
+      </div>
+      <div class="tv-chart"><canvas id="f5i-canvas"></canvas><p class="tv-chart-title">Φ(x) и точка пересечения с заданным уровнем</p></div>
+    `,
+    init() {
+      const compute = () => {
+        const p = num('f5i-p');
+        if (!isFinite(p) || p <= -0.5 || p >= 0.5) { setVal('f5i-out', 'Нужно −0,5 &lt; Φ &lt; 0,5', true); return; }
+        const x = M.normInv(p + 0.5);
+        setVal('f5i-out', fmt(x, 4));
+        drawCurve($('f5i-canvas'), t => M.normCdf(t,0,1) - 0.5, {
+          xMin: -4, xMax: 4, yMin: -0.5, yMax: 0.5,
+          xLabel: 'x', yLabel: 'Φ(x)',
+          fill: false, marker: x, markerY: p
+        });
+      };
+      $('f5i-p').addEventListener('input', compute);
+      compute();
+    }
+  },
+  /* ----------------------------------------------------- 6 */
+  {
+    id: 'binom',
+    nav: '6. Биномиальное распределение',
+    title: 'Биномиальное распределение — таблица',
+    desc: 'Полная таблица вероятностей P(X=k) для k = 0, 1, …, n.',
+    formula: 'P(X=k) = C<sub>n</sub><sup>k</sup> · p<sup>k</sup> · (1−p)<sup>n−k</sup>',
+    html: `
+      <div class="tv-inputs">
+        <div class="tv-input"><label>n</label><input type="number" id="f6-n" min="0" max="60" step="1" value="6"></div>
+        <div class="tv-input"><label>p</label><input type="number" id="f6-p" min="0" max="1" step="0.01" value="0.5"></div>
+      </div>
+      <div class="tv-results">
+        <div class="tv-result"><div class="tv-rlabel">M(X) = np</div><div class="tv-rval" id="f6-mean">—</div></div>
+        <div class="tv-result"><div class="tv-rlabel">D(X) = np(1−p)</div><div class="tv-rval" id="f6-var">—</div></div>
+        <div class="tv-result"><div class="tv-rlabel">∑ P (контроль)</div><div class="tv-rval" id="f6-sum">—</div></div>
+      </div>
+      <div class="tv-table-wrap"><table id="f6-table"></table></div>
+      <div class="tv-chart"><canvas id="f6-canvas"></canvas><p class="tv-chart-title">P(X=k)</p></div>
+    `,
+    init() {
+      const compute = () => {
+        const n = num('f6-n'), p = num('f6-p');
+        if (!Number.isInteger(n) || n < 0 || n > 60 || !isFinite(p) || p < 0 || p > 1) {
+          setVal('f6-mean','—', true); setVal('f6-var','—'); setVal('f6-sum','—');
+          $('f6-table').innerHTML = '';
+          return;
+        }
+        const ks = [], ps = []; let s = 0;
+        for (let k = 0; k <= n; k++) { const v = M.binomPmf(k,n,p); ks.push(k); ps.push(v); s += v; }
+        const trK = '<tr><th>k</th>' + ks.map(k => '<td>' + k + '</td>').join('') + '</tr>';
+        const trP = '<tr><th>P(X=k)</th>' + ps.map(v => '<td>' + fmt(v, 4) + '</td>').join('') + '</tr>';
+        $('f6-table').innerHTML = trK + trP;
+        setVal('f6-mean', fmt(n*p, 4));
+        setVal('f6-var', fmt(n*p*(1-p), 4));
+        setVal('f6-sum', fmt(s, 6));
+        drawBars($('f6-canvas'), ks, ps);
+      };
+      ['f6-n','f6-p'].forEach(i => $(i).addEventListener('input', compute));
+      compute();
+    }
+  },
+  /* ----------------------------------------------------- 7 */
+  {
+    id: 'poisson',
+    nav: '7. Распределение Пуассона',
+    title: 'Распределение Пуассона',
+    desc: 'Применяется при больших n и малых p (редкие события). Параметр λ = np.',
+    formula: 'P(X=k) = (λ<sup>k</sup> ⁄ k!) · e<sup>−λ</sup>',
+    html: `
+      <p class="tv-help">Можно ввести n и p — λ посчитается автоматически. Либо ввести λ напрямую.</p>
+      <div class="tv-inputs">
+        <div class="tv-input"><label>n</label><input type="number" id="f7-n" min="0" step="1" value="500"></div>
+        <div class="tv-input"><label>p</label><input type="number" id="f7-p" min="0" max="1" step="0.001" value="0.004"></div>
+        <div class="tv-input"><label>λ (если задано напрямую)</label><input type="number" id="f7-lam" min="0" step="0.01" value=""></div>
+        <div class="tv-input"><label>k_max (для таблицы)</label><input type="number" id="f7-kmax" min="1" max="60" step="1" value="12"></div>
+      </div>
+      <div class="tv-results">
+        <div class="tv-result"><div class="tv-rlabel">λ = np</div><div class="tv-rval" id="f7-lambda">—</div></div>
+        <div class="tv-result"><div class="tv-rlabel">M(X) = λ</div><div class="tv-rval" id="f7-mean">—</div></div>
+        <div class="tv-result"><div class="tv-rlabel">D(X) = λ</div><div class="tv-rval" id="f7-var">—</div></div>
+      </div>
+      <div class="tv-table-wrap"><table id="f7-table"></table></div>
+      <div class="tv-chart"><canvas id="f7-canvas"></canvas><p class="tv-chart-title">P(X=k)</p></div>
+    `,
+    init() {
+      const compute = () => {
+        const lamDirect = parseFloat(($('f7-lam').value || '').replace(',', '.'));
+        let lam;
+        if (isFinite(lamDirect) && lamDirect >= 0) lam = lamDirect;
+        else { lam = num('f7-n') * num('f7-p'); }
+        const kmax = num('f7-kmax');
+        if (!isFinite(lam) || lam < 0 || !Number.isInteger(kmax) || kmax < 1 || kmax > 60) {
+          setVal('f7-lambda','—', true); $('f7-table').innerHTML = ''; return;
+        }
+        setVal('f7-lambda', fmt(lam, 4));
+        setVal('f7-mean', fmt(lam, 4));
+        setVal('f7-var', fmt(lam, 4));
+        const ks = [], ps = [];
+        for (let k = 0; k <= kmax; k++) { ks.push(k); ps.push(M.poissonPmf(k, lam)); }
+        const trK = '<tr><th>k</th>' + ks.map(k => '<td>' + k + '</td>').join('') + '</tr>';
+        const trP = '<tr><th>P(X=k)</th>' + ps.map(v => '<td>' + fmt(v, 4) + '</td>').join('') + '</tr>';
+        $('f7-table').innerHTML = trK + trP;
+        drawBars($('f7-canvas'), ks, ps);
+      };
+      ['f7-n','f7-p','f7-lam','f7-kmax'].forEach(i => $(i).addEventListener('input', compute));
+      compute();
+    }
+  },
+  /* ----------------------------------------------------- 8 */
+  {
+    id: 'hyper',
+    nav: '8. Гипергеометрическое',
+    title: 'Гипергеометрическое распределение',
+    desc: 'Выбор без возвращения: из N объектов, среди которых K «успешных», берётся выборка размером n.',
+    formula: 'P(X=k) = C<sub>K</sub><sup>k</sup> · C<sub>N−K</sub><sup>n−k</sup> ⁄ C<sub>N</sub><sup>n</sup>',
+    html: `
+      <div class="tv-inputs">
+        <div class="tv-input"><label>N (всего)</label><input type="number" id="f8-N" min="1" step="1" value="20"></div>
+        <div class="tv-input"><label>K (успешных)</label><input type="number" id="f8-K" min="0" step="1" value="8"></div>
+        <div class="tv-input"><label>n (размер выборки)</label><input type="number" id="f8-n" min="0" step="1" value="5"></div>
+      </div>
+      <div class="tv-results">
+        <div class="tv-result"><div class="tv-rlabel">M(X) = nK/N</div><div class="tv-rval" id="f8-mean">—</div></div>
+        <div class="tv-result"><div class="tv-rlabel">D(X)</div><div class="tv-rval" id="f8-var">—</div></div>
+      </div>
+      <div class="tv-table-wrap"><table id="f8-table"></table></div>
+      <div class="tv-chart"><canvas id="f8-canvas"></canvas><p class="tv-chart-title">P(X=k)</p></div>
+    `,
+    init() {
+      const compute = () => {
+        const N = num('f8-N'), K = num('f8-K'), n = num('f8-n');
+        if (!Number.isInteger(N) || !Number.isInteger(K) || !Number.isInteger(n)
+            || N <= 0 || K < 0 || n < 0 || K > N || n > N) {
+          setVal('f8-mean','Проверьте: 0 ≤ K ≤ N, 0 ≤ n ≤ N', true);
+          setVal('f8-var','—');
+          $('f8-table').innerHTML = '';
+          return;
+        }
+        const kMin = Math.max(0, n + K - N);
+        const kMax = Math.min(n, K);
+        const ks = [], ps = [];
+        for (let k = 0; k <= n; k++) {
+          ks.push(k);
+          ps.push((k >= kMin && k <= kMax) ? M.hypgeomPmf(k, N, K, n) : 0);
+        }
+        const trK = '<tr><th>k</th>' + ks.map(k => '<td>' + k + '</td>').join('') + '</tr>';
+        const trP = '<tr><th>P(X=k)</th>' + ps.map(v => '<td>' + fmt(v, 4) + '</td>').join('') + '</tr>';
+        $('f8-table').innerHTML = trK + trP;
+        const m = n * K / N;
+        const v = n * K * (N-K) * (N-n) / (N*N*(N-1));
+        setVal('f8-mean', fmt(m, 4));
+        setVal('f8-var', fmt(v, 4));
+        drawBars($('f8-canvas'), ks, ps);
+      };
+      ['f8-N','f8-K','f8-n'].forEach(i => $(i).addEventListener('input', compute));
+      compute();
+    }
+  },
+  /* ----------------------------------------------------- 9 */
+  {
+    id: 'norm',
+    nav: '9. Нормальное распределение',
+    title: 'Нормальное распределение N(μ, σ)',
+    desc: 'Плотность и интегральная функция распределения нормальной случайной величины с параметрами μ (мат. ожидание) и σ (стандартное отклонение).',
+    formula: 'φ(x) = ( 1 ⁄ ( σ √(2π) ) ) · e<sup>−(x−μ)²⁄(2σ²)</sup>;&nbsp;&nbsp; F(x) = ∫<sub>−∞</sub><sup>x</sup> φ(t)dt',
+    html: `
+      <div class="tv-inputs">
+        <div class="tv-input"><label>μ</label><input type="number" id="f9-mu" step="0.01" value="1000"></div>
+        <div class="tv-input"><label>σ</label><input type="number" id="f9-sg" step="0.01" value="5"></div>
+        <div class="tv-input"><label>x</label><input type="number" id="f9-x" step="0.01" value="1005"></div>
+      </div>
+      <div class="tv-results">
+        <div class="tv-result"><div class="tv-rlabel">φ(x) — плотность</div><div class="tv-rval" id="f9-pdf">—</div></div>
+        <div class="tv-result"><div class="tv-rlabel">F(x) — интегральная</div><div class="tv-rval" id="f9-cdf">—</div></div>
+      </div>
+      <div class="tv-chart"><canvas id="f9-pdfc"></canvas><p class="tv-chart-title">Плотность φ(x)</p></div>
+      <div style="height:10px"></div>
+      <div class="tv-chart"><canvas id="f9-cdfc"></canvas><p class="tv-chart-title">Интегральная функция F(x)</p></div>
+    `,
+    init() {
+      const compute = () => {
+        const mu = num('f9-mu'), sg = num('f9-sg'), x = num('f9-x');
+        if (!isFinite(mu) || !isFinite(sg) || sg <= 0 || !isFinite(x)) {
+          setVal('f9-pdf','σ должно быть > 0', true); setVal('f9-cdf','—'); return;
+        }
+        setVal('f9-pdf', fmt(M.normPdf(x, mu, sg), 4));
+        setVal('f9-cdf', fmt(M.normCdf(x, mu, sg), 4));
+        const lo = mu - 4*sg, hi = mu + 4*sg;
+        drawCurve($('f9-pdfc'), t => M.normPdf(t, mu, sg), {
+          xMin: lo, xMax: hi, xLabel: 'x', yLabel: 'φ(x)', marker: x
+        });
+        drawCurve($('f9-cdfc'), t => M.normCdf(t, mu, sg), {
+          xMin: lo, xMax: hi, yMin: 0, yMax: 1,
+          xLabel: 'x', yLabel: 'F(x)', fill: false,
+          marker: x, markerY: M.normCdf(x, mu, sg)
+        });
+      };
+      ['f9-mu','f9-sg','f9-x'].forEach(i => $(i).addEventListener('input', compute));
+      compute();
+    }
+  },
+  /* ----------------------------------------------------- 10 */
+  {
+    id: 'student',
+    nav: '10. Распределение Стьюдента',
+    title: 'Распределение Стьюдента',
+    desc: 'Используется в задачах оценивания мат. ожидания при неизвестной дисперсии и в проверке гипотез.',
+    formula: 'f(t) = ( Γ((k+1)⁄2) ⁄ ( √(kπ) Γ(k⁄2) ) ) · ( 1 + t²⁄k )<sup>−(k+1)⁄2</sup>',
+    html: `
+      <div class="tv-tabs" id="f10-tabs">
+        <button data-sub="t10a" class="active">10а. По t найти Pγ</button>
+        <button data-sub="t10b">10б. По Pγ найти t</button>
+        <button data-sub="t10c">10в. Критические точки</button>
+      </div>
+
+      <div class="tv-subpage active" id="t10a">
+        <p class="tv-help">Доверительная вероятность <b>Pγ = 1 − α</b>, где α двусторонняя p-величина: <b>α = P(|T| ≥ t)</b>.</p>
+        <div class="tv-inputs">
+          <div class="tv-input"><label>t</label><input type="number" id="f10a-t" step="0.001" value="2.262"></div>
+          <div class="tv-input"><label>k (степени свободы)</label><input type="number" id="f10a-df" min="1" step="1" value="9"></div>
+        </div>
+        <div class="tv-results">
+          <div class="tv-result"><div class="tv-rlabel">α (двусторонняя)</div><div class="tv-rval" id="f10a-alpha">—</div></div>
+          <div class="tv-result"><div class="tv-rlabel">Pγ = 1 − α</div><div class="tv-rval" id="f10a-pg">—</div></div>
+        </div>
+        <div class="tv-chart"><canvas id="f10a-canvas"></canvas><p class="tv-chart-title">Плотность Стьюдента, заштрихованы области |T| ≥ t</p></div>
+      </div>
+
+      <div class="tv-subpage" id="t10b">
+        <p class="tv-help">По доверительной вероятности Pγ найти t-коэффициент (двусторонний).</p>
+        <div class="tv-inputs">
+          <div class="tv-input"><label>Pγ (0…1)</label><input type="number" id="f10b-pg" min="0" max="1" step="0.001" value="0.95"></div>
+          <div class="tv-input"><label>k (степени свободы)</label><input type="number" id="f10b-df" min="1" step="1" value="9"></div>
+        </div>
+        <div class="tv-results">
+          <div class="tv-result"><div class="tv-rlabel">t</div><div class="tv-rval" id="f10b-t">—</div></div>
+        </div>
+        <div class="tv-chart"><canvas id="f10b-canvas"></canvas><p class="tv-chart-title">Плотность Стьюдента, маркер на t</p></div>
+      </div>
+
+      <div class="tv-subpage" id="t10c">
+        <p class="tv-help">Критические точки распределения Стьюдента для проверки гипотез.</p>
+        <div class="tv-inputs">
+          <div class="tv-input"><label>α (уровень значимости)</label><input type="number" id="f10c-a" min="0" max="1" step="0.001" value="0.05"></div>
+          <div class="tv-input"><label>k (степени свободы)</label><input type="number" id="f10c-df" min="1" step="1" value="20"></div>
+        </div>
+        <div class="tv-results">
+          <div class="tv-result"><div class="tv-rlabel">t<sub>двуст.</sub> (α)</div><div class="tv-rval" id="f10c-t2">—</div></div>
+          <div class="tv-result"><div class="tv-rlabel">t<sub>правост.</sub> (α)</div><div class="tv-rval" id="f10c-t1">—</div></div>
+        </div>
+        <div class="tv-chart"><canvas id="f10c-canvas"></canvas><p class="tv-chart-title">Плотность Стьюдента, заштрихованы области |T| ≥ t<sub>двуст.</sub></p></div>
+      </div>
+    `,
+    init() {
+      // tabs
+      const tabs = $('f10-tabs').querySelectorAll('button');
+      tabs.forEach(b => b.addEventListener('click', () => {
+        tabs.forEach(x => x.classList.remove('active'));
+        b.classList.add('active');
+        ['t10a','t10b','t10c'].forEach(id => $(id).classList.remove('active'));
+        $(b.dataset.sub).classList.add('active');
+        compute(); // перерисовать активный график
+      }));
+      const compute = () => {
+        // 10a
+        const ta = num('f10a-t'), dfa = num('f10a-df');
+        if (isFinite(ta) && Number.isInteger(dfa) && dfa >= 1) {
+          const al = M.studentTwoTail(ta, dfa);
+          setVal('f10a-alpha', fmt(al, 6));
+          setVal('f10a-pg', fmt(1 - al, 6));
+          if ($('t10a').classList.contains('active')) {
+            const lo = -Math.max(4, Math.abs(ta)*1.2), hi = -lo;
+            drawCurve($('f10a-canvas'), t => M.studentPdf(t, dfa), {
+              xMin: lo, xMax: hi, xLabel: 't', yLabel: 'f(t)',
+              shadeAbsFrom: Math.abs(ta), marker: ta, markerY: M.studentPdf(ta, dfa)
+            });
+          }
+        } else { setVal('f10a-alpha','Проверьте входные данные', true); setVal('f10a-pg','—'); }
+
+        // 10b
+        const pg = num('f10b-pg'), dfb = num('f10b-df');
+        if (isFinite(pg) && pg > 0 && pg < 1 && Number.isInteger(dfb) && dfb >= 1) {
+          const tb = M.studentInv(1 - pg, dfb);
+          setVal('f10b-t', fmt(tb, 4));
+          if ($('t10b').classList.contains('active')) {
+            const lo = -Math.max(4, Math.abs(tb)*1.4), hi = -lo;
+            drawCurve($('f10b-canvas'), t => M.studentPdf(t, dfb), {
+              xMin: lo, xMax: hi, xLabel: 't', yLabel: 'f(t)',
+              shadeAbsFrom: tb, marker: tb, markerY: M.studentPdf(tb, dfb)
+            });
+          }
+        } else setVal('f10b-t','Проверьте входные данные', true);
+
+        // 10c
+        const ac = num('f10c-a'), dfc = num('f10c-df');
+        if (isFinite(ac) && ac > 0 && ac < 1 && Number.isInteger(dfc) && dfc >= 1) {
+          const t2 = M.studentInv(ac, dfc);
+          const t1 = M.studentInv(2*ac, dfc);
+          setVal('f10c-t2', fmt(t2, 4));
+          setVal('f10c-t1', fmt(t1, 4));
+          if ($('t10c').classList.contains('active')) {
+            const lo = -Math.max(4, t2*1.4), hi = -lo;
+            drawCurve($('f10c-canvas'), t => M.studentPdf(t, dfc), {
+              xMin: lo, xMax: hi, xLabel: 't', yLabel: 'f(t)',
+              shadeAbsFrom: t2, marker: t2, markerY: M.studentPdf(t2, dfc)
+            });
+          }
+        } else { setVal('f10c-t2','Проверьте входные данные', true); setVal('f10c-t1','—'); }
+      };
+      ['f10a-t','f10a-df','f10b-pg','f10b-df','f10c-a','f10c-df']
+        .forEach(i => $(i).addEventListener('input', compute));
+      compute();
+    }
+  },
+  /* ----------------------------------------------------- 11 */
+  {
+    id: 'chi',
+    nav: '11. Распределение χ²',
+    title: 'Распределение χ² Пирсона',
+    desc: 'Используется в проверке согласия и гипотез о дисперсии. Параметр k — степени свободы.',
+    formula: 'f(x) = x<sup>k⁄2 − 1</sup> e<sup>−x⁄2</sup> ⁄ ( 2<sup>k⁄2</sup> Γ(k⁄2) ),&nbsp; x ≥ 0',
+    html: `
+      <div class="tv-tabs" id="f11-tabs">
+        <button data-sub="t11a" class="active">11а. По χ² найти α</button>
+        <button data-sub="t11b">11б. По α найти χ²<sub>крит</sub></button>
+      </div>
+
+      <div class="tv-subpage active" id="t11a">
+        <div class="tv-inputs">
+          <div class="tv-input"><label>χ² (наблюдаемое)</label><input type="number" id="f11a-chi" step="0.01" value="19.0228"></div>
+          <div class="tv-input"><label>k (степени свободы)</label><input type="number" id="f11a-df" min="1" step="1" value="9"></div>
+        </div>
+        <div class="tv-results">
+          <div class="tv-result"><div class="tv-rlabel">α = P(X² ≥ χ²)</div><div class="tv-rval" id="f11a-out">—</div></div>
+        </div>
+        <div class="tv-chart"><canvas id="f11a-canvas"></canvas><p class="tv-chart-title">Плотность χ², правый хвост закрашен</p></div>
+      </div>
+
+      <div class="tv-subpage" id="t11b">
+        <div class="tv-inputs">
+          <div class="tv-input"><label>α (уровень значимости)</label><input type="number" id="f11b-a" min="0" max="1" step="0.001" value="0.025"></div>
+          <div class="tv-input"><label>k (степени свободы)</label><input type="number" id="f11b-df" min="1" step="1" value="9"></div>
+        </div>
+        <div class="tv-results">
+          <div class="tv-result"><div class="tv-rlabel">χ²<sub>крит</sub>(α; k)</div><div class="tv-rval" id="f11b-out">—</div></div>
+        </div>
+        <div class="tv-chart"><canvas id="f11b-canvas"></canvas><p class="tv-chart-title">Плотность χ², отмечена χ²<sub>крит</sub></p></div>
+      </div>
+    `,
+    init() {
+      const tabs = $('f11-tabs').querySelectorAll('button');
+      tabs.forEach(b => b.addEventListener('click', () => {
+        tabs.forEach(x => x.classList.remove('active'));
+        b.classList.add('active');
+        ['t11a','t11b'].forEach(id => $(id).classList.remove('active'));
+        $(b.dataset.sub).classList.add('active');
+        compute();
+      }));
+      const compute = () => {
+        const ca = num('f11a-chi'), dfa = num('f11a-df');
+        if (isFinite(ca) && ca >= 0 && Number.isInteger(dfa) && dfa >= 1) {
+          const a = M.chiSqUpper(ca, dfa);
+          setVal('f11a-out', fmt(a, 6));
+          if ($('t11a').classList.contains('active')) {
+            const hi = Math.max(ca*1.2, dfa + 4*Math.sqrt(2*dfa));
+            drawCurve($('f11a-canvas'), x => M.chiSqPdf(x, dfa), {
+              xMin: 0, xMax: hi, xLabel: 'x', yLabel: 'f(x)',
+              shadeFrom: ca, marker: ca, markerY: M.chiSqPdf(ca, dfa)
+            });
+          }
+        } else setVal('f11a-out','Проверьте входные данные', true);
+
+        const ab = num('f11b-a'), dfb = num('f11b-df');
+        if (isFinite(ab) && ab > 0 && ab < 1 && Number.isInteger(dfb) && dfb >= 1) {
+          const x = M.chiSqInv(ab, dfb);
+          setVal('f11b-out', fmt(x, 4));
+          if ($('t11b').classList.contains('active')) {
+            const hi = Math.max(x*1.3, dfb + 4*Math.sqrt(2*dfb));
+            drawCurve($('f11b-canvas'), t => M.chiSqPdf(t, dfb), {
+              xMin: 0, xMax: hi, xLabel: 'x', yLabel: 'f(x)',
+              shadeFrom: x, marker: x, markerY: M.chiSqPdf(x, dfb)
+            });
+          }
+        } else setVal('f11b-out','Проверьте входные данные', true);
+      };
+      ['f11a-chi','f11a-df','f11b-a','f11b-df'].forEach(i => $(i).addEventListener('input', compute));
+      compute();
+    }
+  },
+  /* ----------------------------------------------------- 12 */
+  {
+    id: 'fisher',
+    nav: '12. Распределение Фишера',
+    title: 'Распределение Фишера—Снедекора',
+    desc: 'Критические точки F-распределения, используются при сравнении двух дисперсий и в дисперсионном анализе.',
+    formula: 'F<sub>крит</sub> = F<sup>−1</sup>(1 − α; k<sub>1</sub>, k<sub>2</sub>)',
+    html: `
+      <p class="tv-help">k<sub>1</sub> — степени свободы выборки с большей дисперсией, k<sub>2</sub> — с меньшей.</p>
+      <div class="tv-inputs">
+        <div class="tv-input"><label>α</label><input type="number" id="f12-a" min="0" max="1" step="0.001" value="0.05"></div>
+        <div class="tv-input"><label>k₁</label><input type="number" id="f12-d1" min="1" step="1" value="10"></div>
+        <div class="tv-input"><label>k₂</label><input type="number" id="f12-d2" min="1" step="1" value="15"></div>
+      </div>
+      <div class="tv-results">
+        <div class="tv-result"><div class="tv-rlabel">F<sub>крит</sub></div><div class="tv-rval" id="f12-out">—</div></div>
+      </div>
+      <div class="tv-chart"><canvas id="f12-canvas"></canvas><p class="tv-chart-title">Плотность F-распределения, правый хвост (область отклонения H₀)</p></div>
+    `,
+    init() {
+      const compute = () => {
+        const a = num('f12-a'), d1 = num('f12-d1'), d2 = num('f12-d2');
+        if (!isFinite(a) || a <= 0 || a >= 1
+            || !Number.isInteger(d1) || d1 < 1
+            || !Number.isInteger(d2) || d2 < 1) {
+          setVal('f12-out','Проверьте входные данные', true); return;
+        }
+        const f = M.fInv(a, d1, d2);
+        setVal('f12-out', fmt(f, 4));
+        const hi = Math.max(f*1.4, 5);
+        drawCurve($('f12-canvas'), x => M.fPdf(x, d1, d2), {
+          xMin: 0, xMax: hi, xLabel: 'x', yLabel: 'f(x)',
+          shadeFrom: f, marker: f, markerY: M.fPdf(f, d1, d2)
+        });
+      };
+      ['f12-a','f12-d1','f12-d2'].forEach(i => $(i).addEventListener('input', compute));
+      compute();
+    }
+  },
+
+  /* ----------------------------------------------------- 13: ОПИСАТЕЛЬНАЯ СТАТИСТИКА */
+  {
+    id: 'stats',
+    nav: '13. Описательная статистика',
+    title: 'Описательная (выборочная) статистика',
+    desc: 'Числовые характеристики выборки и три способа её визуализации. Поддерживается три формата ввода: сырые данные, дискретный ряд (xᵢ, nᵢ) и интервальный ряд (aᵢ, bᵢ, nᵢ).',
+    formula: 'x̄ = Σ xᵢ nᵢ ⁄ N;&nbsp;&nbsp; D_в = Σ (xᵢ − x̄)² nᵢ ⁄ N',
+    html: `
+      <div class="tv-tabs" id="f13-mode-tabs">
+        <button data-mode="raw" class="active">Сырые данные</button>
+        <button data-mode="discrete">Дискретный ряд (xᵢ, nᵢ)</button>
+        <button data-mode="interval">Интервальный ряд</button>
+      </div>
+
+      <div class="tv-mode-input" id="f13-mode-raw">
+        <p class="tv-help">
+          Введите данные в любом удобном формате — через запятую, пробел, точку с запятой,
+          в скобках или по строкам. Десятичная часть — точкой или запятой. Можно скопировать
+          список Python вида <code>[1, 2, 3]</code>. Каждое значение можно отредактировать в ячейках; кнопка <b>+</b> в конце сетки добавляет ячейку.
+        </p>
+        <div class="tv-input"><label>Данные</label>
+          <textarea id="f13r-text" rows="3" placeholder="Например: 12, 14, 16, 12, 18, 14, 16, 14, 12, 16"></textarea>
+        </div>
+        <div class="tv-actions">
+          <button class="tv-btn primary" id="f13r-apply">Применить</button>
+          <button class="tv-btn" id="f13r-example">Пример</button>
+          <button class="tv-btn" id="f13r-clear">Очистить</button>
+          <button class="tv-btn" id="f13r-add10">+10 ячеек</button>
+          <span class="tv-actions-info">N = <b id="f13r-n">0</b></span>
+        </div>
+        <div class="tv-cells" id="f13r-cells"></div>
+      </div>
+
+      <div class="tv-mode-input" id="f13-mode-discrete" style="display:none">
+        <p class="tv-help">
+          Введите дискретный вариационный ряд — пары «значение, частота». В тексте — пары через любые разделители: <code>12 3, 14 5, 16 2</code> или каждая на своей строке. Также можно отредактировать таблицу ниже.
+        </p>
+        <div class="tv-input"><label>Пары: значение, частота</label>
+          <textarea id="f13d-text" rows="3" placeholder="Например: 12 3, 14 5, 16 2"></textarea>
+        </div>
+        <div class="tv-actions">
+          <button class="tv-btn primary" id="f13d-apply">Применить</button>
+          <button class="tv-btn" id="f13d-example">Пример</button>
+          <button class="tv-btn" id="f13d-clear">Очистить</button>
+          <button class="tv-btn" id="f13d-add">+ строка</button>
+          <span class="tv-actions-info">N = <b id="f13d-N">0</b></span>
+        </div>
+        <div class="tv-data-head tv-pair"><div></div><div>xᵢ</div><div>nᵢ</div><div></div></div>
+        <div class="tv-row-grid" id="f13d-rows"></div>
+      </div>
+
+      <div class="tv-mode-input" id="f13-mode-interval" style="display:none">
+        <p class="tv-help">
+          Введите интервальный (группированный) ряд — тройки «нижняя граница, верхняя граница, частота». В тексте: <code>0 10 5, 10 20 12, 20 30 8</code>.
+          <br><b>Замечание:</b> для интервального ряда характеристики приближённые — предполагается, что наблюдения внутри интервала равномерно распределены. Для моды и медианы используются стандартные формулы Гмурмана.
+        </p>
+        <div class="tv-input"><label>Тройки: a, b, частота</label>
+          <textarea id="f13i-text" rows="3" placeholder="Например: 0 10 5, 10 20 12, 20 30 8"></textarea>
+        </div>
+        <div class="tv-actions">
+          <button class="tv-btn primary" id="f13i-apply">Применить</button>
+          <button class="tv-btn" id="f13i-example">Пример</button>
+          <button class="tv-btn" id="f13i-clear">Очистить</button>
+          <button class="tv-btn" id="f13i-add">+ строка</button>
+          <span class="tv-actions-info">N = <b id="f13i-N">0</b></span>
+        </div>
+        <div class="tv-data-head tv-tri"><div></div><div>aᵢ</div><div>bᵢ</div><div>nᵢ</div><div></div></div>
+        <div class="tv-row-grid" id="f13i-rows"></div>
+        <p class="tv-warn" id="f13i-warn" style="display:none"></p>
+      </div>
+
+      <h3 class="tv-section-title">Числовые характеристики</h3>
+      <div class="tv-results" id="f13-stats"></div>
+
+      <div class="tv-tabs" id="f13-tabs">
+        <button data-sub="t13a" class="active">Полигон частот</button>
+        <button data-sub="t13b">Гистограмма</button>
+        <button data-sub="t13c">Эмпирическая F*(x)</button>
+      </div>
+      <div class="tv-subpage active" id="t13a">
+        <div class="tv-chart"><canvas id="f13-poly"></canvas><p class="tv-chart-title" id="f13-poly-title">Линия частот</p></div>
+      </div>
+      <div class="tv-subpage" id="t13b">
+        <div class="tv-inputs" id="f13-bins-wrap">
+          <div class="tv-input"><label>Число интервалов (0 = по Стёрджесу)</label>
+            <input type="number" id="f13-bins" min="0" max="50" step="1" value="0"></div>
+        </div>
+        <div class="tv-chart"><canvas id="f13-hist"></canvas><p class="tv-chart-title" id="f13-hist-title">Гистограмма частот</p></div>
+      </div>
+      <div class="tv-subpage" id="t13c">
+        <div class="tv-chart"><canvas id="f13-edf"></canvas><p class="tv-chart-title" id="f13-edf-title">Эмпирическая функция распределения F*(x)</p></div>
+      </div>
+    `,
+    init() {
+      // === Поля характеристик ===
+      const FIELDS = [
+        ['min',    'Минимум',                'Наименьшее значение.', ''],
+        ['max',    'Максимум',               'Наибольшее значение.', ''],
+        ['range',  'Размах R',               'Разность максимума и минимума.', 'R = x_max − x_min'],
+        ['mean',   'Среднее x̄',              'Среднее арифметическое. Для группированного ряда — взвешенное по частотам.', 'x̄ = Σ xᵢ nᵢ ⁄ N'],
+        ['median', 'Медиана Me',             'Серединное значение. Для интервального ряда — по формуле x₀ + h(N⁄2 − S₋₁)⁄n_Me. Робастна к выбросам.', 'Me = a₀ + h(N⁄2 − S₋₁)⁄n_Me'],
+        ['mode',   'Мода Mo',                'Наиболее часто встречающееся значение (или интервал). Для интервального — формула с соседними частотами.', 'Mo = a₀ + h(n_Mo − n₋₁) ⁄ ((n_Mo − n₋₁) + (n_Mo − n₊₁))'],
+        ['varB',   'Дисперсия выб. D_в',     'Средний квадрат отклонения от среднего; для группированных данных — взвешенный.', 'D_в = Σ (xᵢ − x̄)² nᵢ ⁄ N'],
+        ['var',    'Дисперсия испр. s²',     'Несмещённая оценка генеральной дисперсии — стандартный вариант в статистике.', 's² = Σ (xᵢ − x̄)² nᵢ ⁄ (N − 1)'],
+        ['sdB',    'СКО σ',                  'Корень из выборочной дисперсии. Размерность совпадает с данными.', 'σ = √D_в'],
+        ['sd',     'СКО s',                  'Корень из исправленной дисперсии — несмещённая оценка стандартного отклонения.', 's = √s²'],
+        ['q1',     'Нижний квартиль Q₁',     'Значение, ниже которого 25% наблюдений (с учётом частот).', ''],
+        ['q3',     'Верхний квартиль Q₃',    'Значение, ниже которого 75% наблюдений.', ''],
+        ['iqr',    'IQR',                    'Межквартильный размах — робастная мера разброса.', 'IQR = Q₃ − Q₁'],
+        ['cv',     'Коэф. вариации V',       'Относительная мера разброса (в %). V > 33% — признак неоднородности.', 'V = σ ⁄ |x̄|'],
+        ['skew',   'Асимметрия As',          'Безразмерная мера несимметричности. As > 0 — правый хвост длиннее.', 'As = μ₃ ⁄ σ³'],
+        ['kurt',   'Эксцесс Es',             'Мера остроты пика. Es > 0 — острая вершина с тяжёлыми хвостами; Es = 0 — как у нормального.', 'Es = μ₄ ⁄ σ⁴ − 3']
+      ];
+      $('f13-stats').innerHTML = FIELDS.map(([k, lbl, help, f]) =>
+        `<div class="tv-result">
+           <div class="tv-rlabel">${lbl} ${makeHelp(help, f)}</div>
+           <div class="tv-rval" id="f13-${k}">—</div>
+         </div>`).join('');
+
+      // === Состояние ===
+      let mode = 'raw';
+      let raw = new Array(10).fill(NaN);
+      let discPairs  = Array.from({length: 5}, () => ({ x: NaN, n: NaN }));
+      let intTriples = Array.from({length: 5}, () => ({ a: NaN, b: NaN, n: NaN }));
+
+      // === RAW: сетка ячеек ===
+      function renderRawCells() {
+        const c = $('f13r-cells'); c.innerHTML = '';
+        for (let i = 0; i < raw.length; i++) {
+          const div = document.createElement('div'); div.className = 'tv-cell';
+          const inp = document.createElement('input'); inp.type = 'text';
+          inp.placeholder = String(i + 1);
+          inp.value = isFinite(raw[i]) ? String(raw[i]).replace('.', ',') : '';
+          inp.addEventListener('input', () => {
+            const v = parseFloat(inp.value.replace(',', '.'));
+            raw[i] = isFinite(v) ? v : NaN; recompute();
+          });
+          const x = document.createElement('button');
+          x.className = 'tv-cell-x'; x.textContent = '×'; x.title = 'Удалить';
+          x.addEventListener('click', () => { raw.splice(i, 1); renderRawCells(); recompute(); });
+          div.appendChild(inp); div.appendChild(x);
+          c.appendChild(div);
+        }
+        const add = document.createElement('button');
+        add.className = 'tv-cell-add'; add.textContent = '+'; add.title = 'Добавить ячейку';
+        add.addEventListener('click', () => { raw.push(NaN); renderRawCells(); });
+        c.appendChild(add);
+      }
+
+      // === DISCRETE: пары (x, n) ===
+      function renderDiscRows() {
+        const c = $('f13d-rows'); c.innerHTML = '';
+        for (let i = 0; i < discPairs.length; i++) {
+          const row = document.createElement('div'); row.className = 'tv-data-row';
+          const num = document.createElement('div'); num.className = 'tv-row-num'; num.textContent = (i + 1);
+          const ix = document.createElement('input'); ix.type = 'text';
+          ix.value = isFinite(discPairs[i].x) ? String(discPairs[i].x).replace('.', ',') : '';
+          ix.addEventListener('input', () => {
+            const v = parseFloat(ix.value.replace(',', '.'));
+            discPairs[i].x = isFinite(v) ? v : NaN; recompute();
+          });
+          const inn = document.createElement('input'); inn.type = 'text';
+          inn.value = isFinite(discPairs[i].n) ? String(discPairs[i].n).replace('.', ',') : '';
+          inn.addEventListener('input', () => {
+            const v = parseFloat(inn.value.replace(',', '.'));
+            discPairs[i].n = isFinite(v) ? v : NaN; recompute();
+          });
+          const x = document.createElement('button');
+          x.className = 'tv-cell-x'; x.textContent = '×';
+          x.addEventListener('click', () => { discPairs.splice(i, 1); renderDiscRows(); recompute(); });
+          row.appendChild(num); row.appendChild(ix); row.appendChild(inn); row.appendChild(x);
+          c.appendChild(row);
+        }
+      }
+
+      // === INTERVAL: тройки (a, b, n) ===
+      function renderIntRows() {
+        const c = $('f13i-rows'); c.innerHTML = '';
+        for (let i = 0; i < intTriples.length; i++) {
+          const row = document.createElement('div'); row.className = 'tv-data-row tv-tri';
+          const num = document.createElement('div'); num.className = 'tv-row-num'; num.textContent = (i + 1);
+          const ia = document.createElement('input'); ia.type = 'text';
+          ia.value = isFinite(intTriples[i].a) ? String(intTriples[i].a).replace('.', ',') : '';
+          ia.addEventListener('input', () => {
+            const v = parseFloat(ia.value.replace(',', '.'));
+            intTriples[i].a = isFinite(v) ? v : NaN; recompute();
+          });
+          const ib = document.createElement('input'); ib.type = 'text';
+          ib.value = isFinite(intTriples[i].b) ? String(intTriples[i].b).replace('.', ',') : '';
+          ib.addEventListener('input', () => {
+            const v = parseFloat(ib.value.replace(',', '.'));
+            intTriples[i].b = isFinite(v) ? v : NaN; recompute();
+          });
+          const inn = document.createElement('input'); inn.type = 'text';
+          inn.value = isFinite(intTriples[i].n) ? String(intTriples[i].n).replace('.', ',') : '';
+          inn.addEventListener('input', () => {
+            const v = parseFloat(inn.value.replace(',', '.'));
+            intTriples[i].n = isFinite(v) ? v : NaN; recompute();
+          });
+          const x = document.createElement('button');
+          x.className = 'tv-cell-x'; x.textContent = '×';
+          x.addEventListener('click', () => { intTriples.splice(i, 1); renderIntRows(); recompute(); });
+          row.appendChild(num); row.appendChild(ia); row.appendChild(ib); row.appendChild(inn); row.appendChild(x);
+          c.appendChild(row);
+        }
+      }
+
+      function setMode(m) {
+        mode = m;
+        $('f13-mode-raw').style.display      = mode === 'raw'      ? '' : 'none';
+        $('f13-mode-discrete').style.display = mode === 'discrete' ? '' : 'none';
+        $('f13-mode-interval').style.display = mode === 'interval' ? '' : 'none';
+        $('f13-mode-tabs').querySelectorAll('button').forEach(b =>
+          b.classList.toggle('active', b.dataset.mode === mode));
+        $('f13-bins-wrap').style.display = mode === 'raw' ? '' : 'none';
+        if (mode === 'raw') {
+          $('f13-poly-title').textContent = 'Линия частот уникальных значений';
+          $('f13-hist-title').textContent = 'Гистограмма по равным интервалам';
+          $('f13-edf-title').textContent  = 'Ступенчатая F*(x) сырой выборки';
+        } else if (mode === 'discrete') {
+          $('f13-poly-title').textContent = 'Полигон частот по точкам (xᵢ, nᵢ)';
+          $('f13-hist-title').textContent = 'Столбчатая диаграмма частот';
+          $('f13-edf-title').textContent  = 'Ступенчатая F*(x) дискретного ряда';
+        } else {
+          $('f13-poly-title').textContent = 'Полигон по серединам интервалов';
+          $('f13-hist-title').textContent = 'Гистограмма по введённым интервалам';
+          $('f13-edf-title').textContent  = 'Кумулята F*(x) интервального ряда';
+        }
+        recompute();
+      }
+
+      function getActiveData() {
+        if (mode === 'raw') return { kind: 'raw', xs: raw.filter(v => isFinite(v)) };
+        if (mode === 'discrete') {
+          const pairs = discPairs
+            .filter(p => isFinite(p.x) && isFinite(p.n) && p.n > 0)
+            .map(p => ({ x: p.x, n: p.n }))
+            .sort((a, b) => a.x - b.x);
+          // объединяем дубли
+          const merged = [];
+          for (const p of pairs) {
+            if (merged.length && merged[merged.length-1].x === p.x) merged[merged.length-1].n += p.n;
+            else merged.push({ x: p.x, n: p.n });
+          }
+          return { kind: 'discrete', pairs: merged };
+        }
+        const tris = intTriples
+          .filter(t => isFinite(t.a) && isFinite(t.b) && isFinite(t.n) && t.n > 0 && t.b > t.a)
+          .map(t => ({ a: t.a, b: t.b, n: t.n }))
+          .sort((x, y) => x.a - y.a);
+        let warn = '';
+        for (let i = 1; i < tris.length; i++) {
+          if (tris[i].a < tris[i-1].b - 1e-9) { warn = 'Интервалы пересекаются — характеристики могут быть некорректны.'; break; }
+          if (tris[i].a > tris[i-1].b + 1e-9) { warn = 'Между интервалами есть пробел — расчёт идёт по введённым данным как есть.'; break; }
+        }
+        const w = $('f13i-warn');
+        if (warn) { w.textContent = warn; w.style.display = ''; } else { w.style.display = 'none'; }
+        return { kind: 'interval', tris };
+      }
+
+      function recompute() {
+        const data = getActiveData();
+        const set = (k, v) => setVal('f13-' + k, v);
+
+        if (mode === 'raw')           $('f13r-n').textContent = data.xs.length;
+        else if (mode === 'discrete') $('f13d-N').textContent = data.pairs.reduce((a,p)=>a + p.n, 0);
+        else                          $('f13i-N').textContent = data.tris.reduce((a,t)=>a + t.n, 0);
+
+        const empty =
+          (data.kind === 'raw'      && data.xs.length === 0) ||
+          (data.kind === 'discrete' && data.pairs.length === 0) ||
+          (data.kind === 'interval' && data.tris.length === 0);
+        if (empty) {
+          ['min','max','range','mean','median','mode','varB','var','sdB','sd','q1','q3','iqr','cv','skew','kurt']
+            .forEach(k => set(k, '—'));
+          drawSteps($('f13-edf'), []);
+          drawHist($('f13-hist'), [0, 1], [0]);
+          drawPolygon($('f13-poly'), [], []);
+          return;
+        }
+
+        let minVal, maxVal, m, vB, vS, q1, q3, modeArr, medianVal;
+        if (data.kind === 'raw') {
+          const xs = data.xs;
+          minVal = Math.min(...xs); maxVal = Math.max(...xs);
+          m = M.mean(xs); vB = M.variance(xs, true); vS = M.variance(xs, false);
+          q1 = M.quantile(xs, 0.25); q3 = M.quantile(xs, 0.75); medianVal = M.median(xs);
+          modeArr = M.mode(xs);
+          set('skew', xs.length >= 2 ? fmt(M.skewness(xs), 4) : '—');
+          set('kurt', xs.length >= 2 ? fmt(M.kurtosis(xs), 4) : '—');
+        } else if (data.kind === 'discrete') {
+          const xs = data.pairs.map(p => p.x);
+          const ns = data.pairs.map(p => p.n);
+          const N = M.wSum(ns);
+          minVal = xs[0]; maxVal = xs[xs.length - 1];
+          m = M.wMean(xs, ns); vB = M.wVariance(xs, ns, true); vS = M.wVariance(xs, ns, false);
+          q1 = M.discreteQuantile(xs, ns, 0.25);
+          q3 = M.discreteQuantile(xs, ns, 0.75);
+          medianVal = M.discreteQuantile(xs, ns, 0.5);
+          modeArr = M.discreteMode(xs, ns);
+          set('skew', N >= 2 ? fmt(M.wSkewness(xs, ns), 4) : '—');
+          set('kurt', N >= 2 ? fmt(M.wKurtosis(xs, ns), 4) : '—');
+        } else {
+          const tris = data.tris;
+          minVal = tris[0].a; maxVal = tris[tris.length - 1].b;
+          m = M.intervalMean(tris);
+          vB = M.intervalVariance(tris, true); vS = M.intervalVariance(tris, false);
+          q1 = M.intervalQuantile(tris, 0.25);
+          q3 = M.intervalQuantile(tris, 0.75);
+          medianVal = M.intervalMedian(tris);
+          const mo = M.intervalMode(tris);
+          modeArr = isFinite(mo) ? [mo] : [];
+          const N = tris.reduce((a, t) => a + t.n, 0);
+          set('skew', N >= 2 ? fmt(M.intervalSkewness(tris), 4) : '—');
+          set('kurt', N >= 2 ? fmt(M.intervalKurtosis(tris), 4) : '—');
+        }
+
+        set('min',    fmt(minVal, 6));
+        set('max',    fmt(maxVal, 6));
+        set('range',  fmt(maxVal - minVal, 6));
+        set('mean',   fmt(m, 6));
+        set('median', fmt(medianVal, 6));
+        set('mode',   modeArr.length ? modeArr.map(v => fmt(v, 4)).join('; ') : 'нет');
+        set('varB',   fmt(vB, 6));
+        set('var',    isFinite(vS) ? fmt(vS, 6) : 'нужно N ≥ 2');
+        set('sdB',    fmt(Math.sqrt(vB), 6));
+        set('sd',     isFinite(vS) ? fmt(Math.sqrt(vS), 6) : '—');
+        set('q1',     fmt(q1, 6));
+        set('q3',     fmt(q3, 6));
+        set('iqr',    fmt(q3 - q1, 6));
+        const cv = m === 0 ? NaN : Math.sqrt(vB) / Math.abs(m);
+        set('cv',     isFinite(cv) ? fmtPct(cv) : '—');
+
+        // Графики
+        if ($('t13a').classList.contains('active')) {
+          if (data.kind === 'raw') {
+            const fr = frequencies(data.xs);
+            drawPolygon($('f13-poly'), fr.map(p => p.x), fr.map(p => p.f));
+          } else if (data.kind === 'discrete') {
+            drawPolygon($('f13-poly'), data.pairs.map(p => p.x), data.pairs.map(p => p.n));
+          } else {
+            const xs = data.tris.map(t => (t.a + t.b) / 2);
+            const ns = data.tris.map(t => t.n);
+            drawPolygon($('f13-poly'), xs, ns);
+          }
+        } else if ($('t13b').classList.contains('active')) {
+          if (data.kind === 'raw') {
+            const xs = data.xs;
+            let nBins = parseInt($('f13-bins').value);
+            if (!Number.isInteger(nBins) || nBins < 1)
+              nBins = Math.max(1, Math.round(1 + Math.log2(xs.length)));
+            const lo = Math.min(...xs), hi = Math.max(...xs);
+            const range = (hi - lo) || 1;
+            const h = range / nBins;
+            const edges = []; for (let i = 0; i <= nBins; i++) edges.push(lo + i * h);
+            const freqs = new Array(nBins).fill(0);
+            for (const x of xs) {
+              let kk = Math.floor((x - lo) / h);
+              if (kk >= nBins) kk = nBins - 1;
+              if (kk < 0) kk = 0;
+              freqs[kk]++;
+            }
+            drawHist($('f13-hist'), edges, freqs);
+          } else if (data.kind === 'discrete') {
+            drawBars($('f13-hist'), data.pairs.map(p => p.x), data.pairs.map(p => p.n));
+          } else {
+            const edges = [data.tris[0].a];
+            for (const t of data.tris) edges.push(t.b);
+            drawHist($('f13-hist'), edges, data.tris.map(t => t.n));
+          }
+        } else if ($('t13c').classList.contains('active')) {
+          if (data.kind === 'raw') {
+            drawSteps($('f13-edf'), [...data.xs].sort((a, b) => a - b));
+          } else if (data.kind === 'discrete') {
+            drawStepsWeighted($('f13-edf'), data.pairs.map(p => p.x), data.pairs.map(p => p.n));
+          } else {
+            drawEdfInterval($('f13-edf'), data.tris);
+          }
+        }
+      }
+
+      // === Слушатели ===
+      $('f13-mode-tabs').querySelectorAll('button').forEach(b =>
+        b.addEventListener('click', () => setMode(b.dataset.mode)));
+
+      const tabs = $('f13-tabs').querySelectorAll('button');
+      tabs.forEach(b => b.addEventListener('click', () => {
+        tabs.forEach(x => x.classList.remove('active'));
+        b.classList.add('active');
+        ['t13a','t13b','t13c'].forEach(id => $(id).classList.remove('active'));
+        $(b.dataset.sub).classList.add('active');
+        recompute();
+      }));
+
+      // Raw
+      $('f13r-apply').addEventListener('click', () => {
+        const parsed = parseData($('f13r-text').value);
+        raw = parsed.length ? parsed.slice() : new Array(10).fill(NaN);
+        renderRawCells(); recompute();
+      });
+      $('f13r-example').addEventListener('click', () => {
+        raw = [12, 14, 16, 12, 18, 14, 16, 14, 12, 16, 18, 20, 14, 16, 12];
+        $('f13r-text').value = raw.join(', ');
+        renderRawCells(); recompute();
+      });
+      $('f13r-clear').addEventListener('click', () => {
+        raw = new Array(10).fill(NaN);
+        $('f13r-text').value = ''; renderRawCells(); recompute();
+      });
+      $('f13r-add10').addEventListener('click', () => {
+        for (let i = 0; i < 10; i++) raw.push(NaN); renderRawCells();
+      });
+      $('f13r-text').addEventListener('blur', () => {
+        if ($('f13r-text').value.trim()) $('f13r-apply').click();
+      });
+      $('f13-bins').addEventListener('input', recompute);
+
+      // Discrete
+      $('f13d-apply').addEventListener('click', () => {
+        const arr = parseData($('f13d-text').value);
+        const pairs = [];
+        for (let i = 0; i + 1 < arr.length; i += 2) pairs.push({ x: arr[i], n: arr[i + 1] });
+        discPairs = pairs.length ? pairs : Array.from({length: 5}, () => ({ x: NaN, n: NaN }));
+        renderDiscRows(); recompute();
+      });
+      $('f13d-example').addEventListener('click', () => {
+        discPairs = [{x:10,n:5},{x:12,n:12},{x:14,n:18},{x:16,n:9},{x:18,n:6}];
+        $('f13d-text').value = discPairs.map(p => p.x + ' ' + p.n).join(', ');
+        renderDiscRows(); recompute();
+      });
+      $('f13d-clear').addEventListener('click', () => {
+        discPairs = Array.from({length: 5}, () => ({ x: NaN, n: NaN }));
+        $('f13d-text').value = ''; renderDiscRows(); recompute();
+      });
+      $('f13d-add').addEventListener('click', () => {
+        discPairs.push({ x: NaN, n: NaN }); renderDiscRows();
+      });
+      $('f13d-text').addEventListener('blur', () => {
+        if ($('f13d-text').value.trim()) $('f13d-apply').click();
+      });
+
+      // Interval
+      $('f13i-apply').addEventListener('click', () => {
+        const arr = parseData($('f13i-text').value);
+        const tris = [];
+        for (let i = 0; i + 2 < arr.length; i += 3)
+          tris.push({ a: arr[i], b: arr[i + 1], n: arr[i + 2] });
+        intTriples = tris.length ? tris : Array.from({length: 5}, () => ({ a: NaN, b: NaN, n: NaN }));
+        renderIntRows(); recompute();
+      });
+      $('f13i-example').addEventListener('click', () => {
+        intTriples = [{a:0,b:10,n:5},{a:10,b:20,n:12},{a:20,b:30,n:18},{a:30,b:40,n:10},{a:40,b:50,n:5}];
+        $('f13i-text').value = intTriples.map(t => t.a + ' ' + t.b + ' ' + t.n).join(', ');
+        renderIntRows(); recompute();
+      });
+      $('f13i-clear').addEventListener('click', () => {
+        intTriples = Array.from({length: 5}, () => ({ a: NaN, b: NaN, n: NaN }));
+        $('f13i-text').value = ''; renderIntRows(); recompute();
+      });
+      $('f13i-add').addEventListener('click', () => {
+        intTriples.push({ a: NaN, b: NaN, n: NaN }); renderIntRows();
+      });
+      $('f13i-text').addEventListener('blur', () => {
+        if ($('f13i-text').value.trim()) $('f13i-apply').click();
+      });
+
+      renderRawCells(); renderDiscRows(); renderIntRows();
+      setMode('raw');
+    }
+  },
+
+  /* ----------------------------------------------------- 14: ГЕОМЕТРИЧЕСКОЕ */
+  {
+    id: 'geom',
+    nav: '14. Геометрическое',
+    title: 'Геометрическое распределение Geom(p)',
+    desc: 'Число испытаний Бернулли до первого успеха включительно. k = 1, 2, 3, …',
+    formula: 'P(X = k) = (1 − p)<sup>k−1</sup> · p',
+    html: `
+      <div class="tv-inputs">
+        <div class="tv-input"><label>p (вероятность успеха) ${makeHelp('Вероятность успеха в одном испытании. X — номер первого успеха.', '')}</label>
+          <input type="number" id="f14-p" min="0.001" max="1" step="0.01" value="0.3"></div>
+        <div class="tv-input"><label>k (для P(X=k))</label>
+          <input type="number" id="f14-k" min="1" step="1" value="3"></div>
+        <div class="tv-input"><label>k_max (для таблицы)</label>
+          <input type="number" id="f14-kmax" min="1" max="40" step="1" value="15"></div>
+      </div>
+      <div class="tv-results">
+        <div class="tv-result"><div class="tv-rlabel">P(X = k)</div><div class="tv-rval" id="f14-pmf">—</div></div>
+        <div class="tv-result"><div class="tv-rlabel">P(X ≤ k)</div><div class="tv-rval" id="f14-cdf">—</div></div>
+        <div class="tv-result"><div class="tv-rlabel">M(X) = 1⁄p ${makeHelp('Среднее число испытаний до первого успеха.', 'M(X) = 1⁄p')}</div><div class="tv-rval" id="f14-mean">—</div></div>
+        <div class="tv-result"><div class="tv-rlabel">D(X) = (1−p)⁄p²</div><div class="tv-rval" id="f14-var">—</div></div>
+      </div>
+      <div class="tv-chart"><canvas id="f14-canvas"></canvas><p class="tv-chart-title">P(X=k)</p></div>
+    `,
+    init() {
+      const compute = () => {
+        const p = num('f14-p'), k = num('f14-k'), kmax = num('f14-kmax');
+        if (!isFinite(p) || p <= 0 || p > 1
+            || !Number.isInteger(k) || k < 1
+            || !Number.isInteger(kmax) || kmax < 1 || kmax > 40) {
+          setVal('f14-pmf', 'Проверьте входные данные', true);
+          return;
+        }
+        setVal('f14-pmf',  fmt(M.geomPmf(k, p), 6));
+        setVal('f14-cdf',  fmt(M.geomCdf(k, p), 6));
+        setVal('f14-mean', fmt(1/p, 4));
+        setVal('f14-var',  fmt((1-p)/(p*p), 4));
+        const ks = [], ps = [];
+        for (let i = 1; i <= kmax; i++) { ks.push(i); ps.push(M.geomPmf(i, p)); }
+        drawBars($('f14-canvas'), ks, ps, { highlight: k });
+      };
+      ['f14-p','f14-k','f14-kmax'].forEach(i => $(i).addEventListener('input', compute));
+      compute();
+    }
+  },
+
+  /* ----------------------------------------------------- 15: ЭКСПОНЕНЦИАЛЬНОЕ */
+  {
+    id: 'expdist',
+    nav: '15. Экспоненциальное',
+    title: 'Экспоненциальное распределение Exp(λ)',
+    desc: 'Время между событиями в Пуассоновском процессе с интенсивностью λ.',
+    formula: 'f(x) = λ · e<sup>−λx</sup>;&nbsp;&nbsp;&nbsp; F(x) = 1 − e<sup>−λx</sup>,&nbsp; x ≥ 0',
+    html: `
+      <div class="tv-inputs">
+        <div class="tv-input"><label>λ (интенсивность) ${makeHelp('Среднее число событий в единицу времени. Среднее время между событиями = 1⁄λ.', '')}</label>
+          <input type="number" id="f15-lam" min="0.001" step="0.01" value="0.5"></div>
+        <div class="tv-input"><label>x</label>
+          <input type="number" id="f15-x" min="0" step="0.1" value="2"></div>
+      </div>
+      <div class="tv-results">
+        <div class="tv-result"><div class="tv-rlabel">f(x) — плотность</div><div class="tv-rval" id="f15-pdf">—</div></div>
+        <div class="tv-result"><div class="tv-rlabel">F(x) — CDF</div><div class="tv-rval" id="f15-cdf">—</div></div>
+        <div class="tv-result"><div class="tv-rlabel">M(X) = 1⁄λ</div><div class="tv-rval" id="f15-mean">—</div></div>
+        <div class="tv-result"><div class="tv-rlabel">D(X) = 1⁄λ²</div><div class="tv-rval" id="f15-var">—</div></div>
+      </div>
+      <div class="tv-chart"><canvas id="f15-pdfc"></canvas><p class="tv-chart-title">Плотность f(x)</p></div>
+      <div style="height:10px"></div>
+      <div class="tv-chart"><canvas id="f15-cdfc"></canvas><p class="tv-chart-title">Интегральная функция F(x)</p></div>
+    `,
+    init() {
+      const compute = () => {
+        const lam = num('f15-lam'), x = num('f15-x');
+        if (!isFinite(lam) || lam <= 0 || !isFinite(x) || x < 0) {
+          setVal('f15-pdf', 'Проверьте входные данные', true);
+          return;
+        }
+        setVal('f15-pdf', fmt(M.expPdf(x, lam), 6));
+        setVal('f15-cdf', fmt(M.expCdf(x, lam), 6));
+        setVal('f15-mean', fmt(1/lam, 4));
+        setVal('f15-var', fmt(1/(lam*lam), 4));
+        const hi = Math.max(M.expInv(0.99, lam), x*1.2);
+        drawCurve($('f15-pdfc'), t => M.expPdf(t, lam), {
+          xMin: 0, xMax: hi, xLabel: 'x', yLabel: 'f(x)',
+          marker: x, markerY: M.expPdf(x, lam)
+        });
+        drawCurve($('f15-cdfc'), t => M.expCdf(t, lam), {
+          xMin: 0, xMax: hi, yMin: 0, yMax: 1, fill: false,
+          xLabel: 'x', yLabel: 'F(x)', marker: x, markerY: M.expCdf(x, lam)
+        });
+      };
+      ['f15-lam','f15-x'].forEach(i => $(i).addEventListener('input', compute));
+      compute();
+    }
+  },
+
+  /* ----------------------------------------------------- 16: РАВНОМЕРНОЕ */
+  {
+    id: 'unif',
+    nav: '16. Равномерное',
+    title: 'Равномерное распределение U(a, b)',
+    desc: 'Все точки отрезка [a, b] равновероятны. Простейшее непрерывное распределение.',
+    formula: 'f(x) = 1 ⁄ (b − a),&nbsp; x ∈ [a, b];&nbsp;&nbsp; F(x) = (x − a) ⁄ (b − a)',
+    html: `
+      <div class="tv-inputs">
+        <div class="tv-input"><label>a</label>
+          <input type="number" id="f16-a" step="0.1" value="0"></div>
+        <div class="tv-input"><label>b</label>
+          <input type="number" id="f16-b" step="0.1" value="10"></div>
+        <div class="tv-input"><label>x</label>
+          <input type="number" id="f16-x" step="0.1" value="3"></div>
+      </div>
+      <div class="tv-results">
+        <div class="tv-result"><div class="tv-rlabel">f(x)</div><div class="tv-rval" id="f16-pdf">—</div></div>
+        <div class="tv-result"><div class="tv-rlabel">F(x)</div><div class="tv-rval" id="f16-cdf">—</div></div>
+        <div class="tv-result"><div class="tv-rlabel">M(X) = (a+b)⁄2</div><div class="tv-rval" id="f16-mean">—</div></div>
+        <div class="tv-result"><div class="tv-rlabel">D(X) = (b−a)²⁄12</div><div class="tv-rval" id="f16-var">—</div></div>
+      </div>
+      <div class="tv-chart"><canvas id="f16-pdfc"></canvas><p class="tv-chart-title">Плотность f(x)</p></div>
+      <div style="height:10px"></div>
+      <div class="tv-chart"><canvas id="f16-cdfc"></canvas><p class="tv-chart-title">Интегральная функция F(x)</p></div>
+    `,
+    init() {
+      const compute = () => {
+        const a = num('f16-a'), b = num('f16-b'), x = num('f16-x');
+        if (!isFinite(a) || !isFinite(b) || b <= a || !isFinite(x)) {
+          setVal('f16-pdf', 'Нужно b > a', true);
+          return;
+        }
+        setVal('f16-pdf', fmt(M.unifPdf(x, a, b), 6));
+        setVal('f16-cdf', fmt(M.unifCdf(x, a, b), 6));
+        setVal('f16-mean', fmt((a+b)/2, 4));
+        setVal('f16-var', fmt((b-a)*(b-a)/12, 4));
+        const lo = a - (b-a)*0.15, hi = b + (b-a)*0.15;
+        drawCurve($('f16-pdfc'), t => M.unifPdf(t, a, b), {
+          xMin: lo, xMax: hi, yMin: 0, yMax: 1.5/(b-a),
+          xLabel: 'x', yLabel: 'f(x)',
+          marker: x, markerY: M.unifPdf(x, a, b)
+        });
+        drawCurve($('f16-cdfc'), t => M.unifCdf(t, a, b), {
+          xMin: lo, xMax: hi, yMin: 0, yMax: 1.05, fill: false,
+          xLabel: 'x', yLabel: 'F(x)',
+          marker: x, markerY: M.unifCdf(x, a, b)
+        });
+      };
+      ['f16-a','f16-b','f16-x'].forEach(i => $(i).addEventListener('input', compute));
+      compute();
+    }
+  },
+
+  /* ----------------------------------------------------- 17: ГАММА */
+  {
+    id: 'gamma',
+    nav: '17. Гамма Γ(k, θ)',
+    title: 'Гамма-распределение Γ(k, θ)',
+    desc: 'Распределение времени до k-го события в Пуассоновском процессе. Включает экспоненциальное (k=1) и Эрланга (целое k) как частные случаи.',
+    formula: 'f(x) = x<sup>k−1</sup> · e<sup>−x⁄θ</sup> ⁄ ( θ<sup>k</sup> · Γ(k) ),&nbsp; x ≥ 0',
+    html: `
+      <div class="tv-inputs">
+        <div class="tv-input"><label>k (форма) ${makeHelp('Параметр формы (shape). При k=1 совпадает с экспоненциальным распределением; при целых k — распределение Эрланга. Среднее = kθ.', 'M(X) = kθ')}</label>
+          <input type="number" id="f17-k" min="0.01" step="0.1" value="2"></div>
+        <div class="tv-input"><label>θ (масштаб) ${makeHelp('Параметр масштаба (scale). Растягивает распределение по оси x.', 'D(X) = kθ²')}</label>
+          <input type="number" id="f17-th" min="0.01" step="0.1" value="1.5"></div>
+        <div class="tv-input"><label>x</label>
+          <input type="number" id="f17-x" min="0" step="0.1" value="3"></div>
+      </div>
+      <div class="tv-results">
+        <div class="tv-result"><div class="tv-rlabel">f(x)</div><div class="tv-rval" id="f17-pdf">—</div></div>
+        <div class="tv-result"><div class="tv-rlabel">F(x)</div><div class="tv-rval" id="f17-cdf">—</div></div>
+        <div class="tv-result"><div class="tv-rlabel">M(X) = kθ</div><div class="tv-rval" id="f17-mean">—</div></div>
+        <div class="tv-result"><div class="tv-rlabel">D(X) = kθ²</div><div class="tv-rval" id="f17-var">—</div></div>
+      </div>
+      <div class="tv-chart"><canvas id="f17-pdfc"></canvas><p class="tv-chart-title">Плотность f(x)</p></div>
+      <div style="height:10px"></div>
+      <div class="tv-chart"><canvas id="f17-cdfc"></canvas><p class="tv-chart-title">Интегральная функция F(x)</p></div>
+    `,
+    init() {
+      const compute = () => {
+        const k = num('f17-k'), th = num('f17-th'), x = num('f17-x');
+        if (!isFinite(k) || k <= 0 || !isFinite(th) || th <= 0 || !isFinite(x) || x < 0) {
+          setVal('f17-pdf', 'Нужно k > 0, θ > 0, x ≥ 0', true);
+          return;
+        }
+        setVal('f17-pdf', fmt(M.gammaPdf(x, k, th), 6));
+        setVal('f17-cdf', fmt(M.gammaCdf(x, k, th), 6));
+        setVal('f17-mean', fmt(k*th, 4));
+        setVal('f17-var', fmt(k*th*th, 4));
+        const hi = Math.max(M.gammaInv(0.995, k, th), x*1.2);
+        drawCurve($('f17-pdfc'), t => M.gammaPdf(t, k, th), {
+          xMin: 0, xMax: hi, xLabel: 'x', yLabel: 'f(x)',
+          marker: x, markerY: M.gammaPdf(x, k, th)
+        });
+        drawCurve($('f17-cdfc'), t => M.gammaCdf(t, k, th), {
+          xMin: 0, xMax: hi, yMin: 0, yMax: 1.05, fill: false,
+          xLabel: 'x', yLabel: 'F(x)',
+          marker: x, markerY: M.gammaCdf(x, k, th)
+        });
+      };
+      ['f17-k','f17-th','f17-x'].forEach(i => $(i).addEventListener('input', compute));
+      compute();
+    }
+  },
+
+  /* ----------------------------------------------------- 18: БЕТА */
+  {
+    id: 'beta',
+    nav: '18. Бета B(α, β)',
+    title: 'Бета-распределение B(α, β)',
+    desc: 'Очень гибкое непрерывное распределение на отрезке [0, 1]. Часто используется для моделирования долей и вероятностей.',
+    formula: 'f(x) = x<sup>α−1</sup>·(1−x)<sup>β−1</sup> ⁄ B(α, β),&nbsp; x ∈ [0, 1]',
+    html: `
+      <div class="tv-inputs">
+        <div class="tv-input"><label>α ${makeHelp('Первый параметр формы. Чем больше α при фиксированном β, тем сильнее распределение смещается к 1.', 'M(X) = α⁄(α+β)')}</label>
+          <input type="number" id="f18-a" min="0.01" step="0.1" value="2"></div>
+        <div class="tv-input"><label>β ${makeHelp('Второй параметр формы. Больший β смещает массу распределения к 0.', '')}</label>
+          <input type="number" id="f18-b" min="0.01" step="0.1" value="5"></div>
+        <div class="tv-input"><label>x ∈ [0, 1]</label>
+          <input type="number" id="f18-x" min="0" max="1" step="0.01" value="0.3"></div>
+      </div>
+      <div class="tv-results">
+        <div class="tv-result"><div class="tv-rlabel">f(x)</div><div class="tv-rval" id="f18-pdf">—</div></div>
+        <div class="tv-result"><div class="tv-rlabel">F(x)</div><div class="tv-rval" id="f18-cdf">—</div></div>
+        <div class="tv-result"><div class="tv-rlabel">M(X) = α⁄(α+β)</div><div class="tv-rval" id="f18-mean">—</div></div>
+        <div class="tv-result"><div class="tv-rlabel">D(X)</div><div class="tv-rval" id="f18-var">—</div></div>
+      </div>
+      <div class="tv-chart"><canvas id="f18-pdfc"></canvas><p class="tv-chart-title">Плотность f(x), x ∈ [0, 1]</p></div>
+      <div style="height:10px"></div>
+      <div class="tv-chart"><canvas id="f18-cdfc"></canvas><p class="tv-chart-title">Интегральная функция F(x)</p></div>
+    `,
+    init() {
+      const compute = () => {
+        const a = num('f18-a'), b = num('f18-b'), x = num('f18-x');
+        if (!isFinite(a) || a <= 0 || !isFinite(b) || b <= 0 || !isFinite(x) || x < 0 || x > 1) {
+          setVal('f18-pdf', 'Нужно α, β > 0; x ∈ [0,1]', true);
+          return;
+        }
+        setVal('f18-pdf', fmt(M.betaPdf(x, a, b), 6));
+        setVal('f18-cdf', fmt(M.betaCdf(x, a, b), 6));
+        setVal('f18-mean', fmt(a/(a+b), 4));
+        setVal('f18-var', fmt((a*b)/((a+b)*(a+b)*(a+b+1)), 6));
+        // авто-масштаб по y
+        const sample = []; for (let i = 1; i < 50; i++) sample.push(M.betaPdf(i/50, a, b));
+        const yMaxAuto = Math.max(...sample.filter(isFinite));
+        drawCurve($('f18-pdfc'), t => M.betaPdf(t, a, b), {
+          xMin: 0, xMax: 1, yMin: 0, yMax: yMaxAuto*1.1 || 1,
+          xLabel: 'x', yLabel: 'f(x)',
+          marker: x, markerY: M.betaPdf(x, a, b)
+        });
+        drawCurve($('f18-cdfc'), t => M.betaCdf(t, a, b), {
+          xMin: 0, xMax: 1, yMin: 0, yMax: 1.05, fill: false,
+          xLabel: 'x', yLabel: 'F(x)',
+          marker: x, markerY: M.betaCdf(x, a, b)
+        });
+      };
+      ['f18-a','f18-b','f18-x'].forEach(i => $(i).addEventListener('input', compute));
+      compute();
+    }
+  },
+
+  /* ----------------------------------------------------- 19: КРИТЕРИЙ ПИРСОНА */
+  {
+    id: 'pearson',
+    nav: '19. Критерий χ² Пирсона',
+    title: 'Критерий согласия χ² Пирсона',
+    desc: 'Проверка гипотезы H₀: выборка извлечена из заданного распределения. Применяется к сырым, дискретным или интервальным данным.',
+    formula: 'χ²<sub>набл</sub> = Σ (nᵢ − Npᵢ)² ⁄ (Npᵢ);&nbsp;&nbsp; k = m − r − 1',
+    html: `
+      <div class="tv-tabs" id="f19-mode-tabs">
+        <button data-mode="raw" class="active">Сырые данные</button>
+        <button data-mode="discrete">Дискретный ряд (xᵢ, nᵢ)</button>
+        <button data-mode="interval">Интервальный ряд</button>
+      </div>
+
+      <div class="tv-mode-input" id="f19-mode-raw">
+        <p class="tv-help">Введите данные через запятую, пробел, по строкам или как список Python.</p>
+        <div class="tv-input"><label>Данные</label>
+          <textarea id="f19r-text" rows="3" placeholder="Например: 12, 14, 16, 12, 18, 14"></textarea>
+        </div>
+        <div class="tv-actions">
+          <button class="tv-btn primary" id="f19r-apply">Применить</button>
+          <button class="tv-btn" id="f19r-example">Пример</button>
+          <button class="tv-btn" id="f19r-clear">Очистить</button>
+          <button class="tv-btn" id="f19r-add10">+10 ячеек</button>
+          <span class="tv-actions-info">N = <b id="f19r-n">0</b></span>
+        </div>
+        <div class="tv-cells" id="f19r-cells"></div>
+      </div>
+
+      <div class="tv-mode-input" id="f19-mode-discrete" style="display:none">
+        <p class="tv-help">Дискретный вариационный ряд — пары (xᵢ, nᵢ).</p>
+        <div class="tv-input"><label>Пары: значение, частота</label>
+          <textarea id="f19d-text" rows="3" placeholder="Например: 0 18, 1 26, 2 18, 3 7, 4 1"></textarea>
+        </div>
+        <div class="tv-actions">
+          <button class="tv-btn primary" id="f19d-apply">Применить</button>
+          <button class="tv-btn" id="f19d-example">Пример (Пуассон)</button>
+          <button class="tv-btn" id="f19d-clear">Очистить</button>
+          <button class="tv-btn" id="f19d-add">+ строка</button>
+          <span class="tv-actions-info">N = <b id="f19d-N">0</b></span>
+        </div>
+        <div class="tv-data-head tv-pair"><div></div><div>xᵢ</div><div>nᵢ</div><div></div></div>
+        <div class="tv-row-grid" id="f19d-rows"></div>
+      </div>
+
+      <div class="tv-mode-input" id="f19-mode-interval" style="display:none">
+        <p class="tv-help">Интервальный (группированный) ряд — тройки (aᵢ, bᵢ, nᵢ).</p>
+        <div class="tv-input"><label>Тройки: a, b, частота</label>
+          <textarea id="f19i-text" rows="3" placeholder="Например: 0 10 5, 10 20 12, 20 30 18, 30 40 10, 40 50 5"></textarea>
+        </div>
+        <div class="tv-actions">
+          <button class="tv-btn primary" id="f19i-apply">Применить</button>
+          <button class="tv-btn" id="f19i-example">Пример</button>
+          <button class="tv-btn" id="f19i-clear">Очистить</button>
+          <button class="tv-btn" id="f19i-add">+ строка</button>
+          <span class="tv-actions-info">N = <b id="f19i-N">0</b></span>
+        </div>
+        <div class="tv-data-head tv-tri"><div></div><div>aᵢ</div><div>bᵢ</div><div>nᵢ</div><div></div></div>
+        <div class="tv-row-grid" id="f19i-rows"></div>
+      </div>
+
+      <h3 class="tv-section-title">Гипотетическое распределение</h3>
+      <div class="tv-tabs" id="f19-dist-tabs">
+        <button data-dist="normal" class="active">Нормальное</button>
+        <button data-dist="uniform">Равномерное</button>
+        <button data-dist="expdist">Экспоненциальное</button>
+        <button data-dist="poisson">Пуассона</button>
+        <button data-dist="binom">Биномиальное</button>
+        <button data-dist="geom">Геометрическое</button>
+      </div>
+      <p class="tv-help" id="f19-dist-desc"></p>
+
+      <div class="tv-inputs" style="grid-template-columns: 1fr;">
+        <div class="tv-input">
+          <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:14px; font-style:normal;">
+            <input type="checkbox" id="f19-estimate" checked>
+            <span>Оценить параметры по выборке (метод моментов)</span>
+            ${makeHelp('Если включено — параметры вычисляются автоматически: μ̂ = x̄, σ̂ = s, λ̂ = x̄ или 1⁄x̄ и т.д. Степени свободы при этом уменьшаются на r — число оценённых параметров (поправка Фишера).', '')}
+          </label>
+        </div>
+      </div>
+      <div class="tv-inputs" id="f19-params"></div>
+
+      <div class="tv-inputs">
+        <div class="tv-input"><label>α (уровень значимости)</label>
+          <input type="number" id="f19-alpha" min="0.001" max="0.5" step="0.001" value="0.05"></div>
+        <div class="tv-input"><label>Число интервалов (только для сырых; 0 = по Стёрджесу)</label>
+          <input type="number" id="f19-bins" min="0" max="50" step="1" value="0"></div>
+      </div>
+
+      <h3 class="tv-section-title">Результат</h3>
+      <div class="tv-results">
+        <div class="tv-result"><div class="tv-rlabel">χ²<sub>набл</sub> ${makeHelp('Наблюдаемое значение статистики Пирсона. Сумма по итоговым (после объединения) интервалам.', 'χ²<sub>набл</sub> = Σ (nᵢ − Npᵢ)² ⁄ Npᵢ')}</div><div class="tv-rval" id="f19-chi">—</div></div>
+        <div class="tv-result"><div class="tv-rlabel">Степени свободы k ${makeHelp('m — итоговое число интервалов (после объединения тех, где Npᵢ < 5); r — число параметров, оценённых по выборке.', 'k = m − r − 1')}</div><div class="tv-rval" id="f19-df">—</div></div>
+        <div class="tv-result"><div class="tv-rlabel">p-value ${makeHelp('P(χ² ≥ χ²_набл) при истинной H₀. Если p-value < α — гипотеза отклоняется.', '')}</div><div class="tv-rval" id="f19-p">—</div></div>
+        <div class="tv-result"><div class="tv-rlabel">χ²<sub>крит</sub>(α; k)</div><div class="tv-rval" id="f19-crit">—</div></div>
+      </div>
+      <div class="tv-conclusion" id="f19-conclusion">Введите данные и выберите распределение.</div>
+
+      <h3 class="tv-section-title">Расчётная таблица</h3>
+      <div class="tv-table-wrap"><table id="f19-table"></table></div>
+      <p class="tv-warn" id="f19-warn" style="display:none"></p>
+
+      <div class="tv-chart"><canvas id="f19-canvas"></canvas><p class="tv-chart-title" id="f19-canvas-title">Наблюдаемые vs теоретические частоты</p></div>
+    `,
+    init() {
+      let mode = 'raw';
+      let raw = new Array(10).fill(NaN);
+      let discPairs  = Array.from({length: 5}, () => ({ x: NaN, n: NaN }));
+      let intTriples = Array.from({length: 5}, () => ({ a: NaN, b: NaN, n: NaN }));
+      let curDist = 'normal';
+      let manualParams = {};
+      let estimate = true;
+
+      function initManualParams(distId) {
+        const d = DISTRIBUTIONS[distId];
+        const obj = {};
+        for (const p of d.params) obj[p.name] = p.def;
+        return obj;
+      }
+      manualParams = initManualParams('normal');
+
+      // === Сетки ввода (повторяют разделы stats, но с префиксом f19) ===
+      function renderRawCells() {
+        const c = $('f19r-cells'); c.innerHTML = '';
+        for (let i = 0; i < raw.length; i++) {
+          const div = document.createElement('div'); div.className = 'tv-cell';
+          const inp = document.createElement('input'); inp.type = 'text';
+          inp.placeholder = String(i + 1);
+          inp.value = isFinite(raw[i]) ? String(raw[i]).replace('.', ',') : '';
+          inp.addEventListener('input', () => {
+            const v = parseFloat(inp.value.replace(',', '.'));
+            raw[i] = isFinite(v) ? v : NaN; recompute();
+          });
+          const x = document.createElement('button');
+          x.className = 'tv-cell-x'; x.textContent = '×';
+          x.addEventListener('click', () => { raw.splice(i, 1); renderRawCells(); recompute(); });
+          div.appendChild(inp); div.appendChild(x);
+          c.appendChild(div);
+        }
+        const add = document.createElement('button');
+        add.className = 'tv-cell-add'; add.textContent = '+';
+        add.addEventListener('click', () => { raw.push(NaN); renderRawCells(); });
+        c.appendChild(add);
+      }
+      function renderDiscRows() {
+        const c = $('f19d-rows'); c.innerHTML = '';
+        for (let i = 0; i < discPairs.length; i++) {
+          const row = document.createElement('div'); row.className = 'tv-data-row';
+          const num = document.createElement('div'); num.className = 'tv-row-num'; num.textContent = (i + 1);
+          const ix = document.createElement('input'); ix.type = 'text';
+          ix.value = isFinite(discPairs[i].x) ? String(discPairs[i].x).replace('.', ',') : '';
+          ix.addEventListener('input', () => {
+            const v = parseFloat(ix.value.replace(',', '.'));
+            discPairs[i].x = isFinite(v) ? v : NaN; recompute();
+          });
+          const inn = document.createElement('input'); inn.type = 'text';
+          inn.value = isFinite(discPairs[i].n) ? String(discPairs[i].n).replace('.', ',') : '';
+          inn.addEventListener('input', () => {
+            const v = parseFloat(inn.value.replace(',', '.'));
+            discPairs[i].n = isFinite(v) ? v : NaN; recompute();
+          });
+          const x = document.createElement('button');
+          x.className = 'tv-cell-x'; x.textContent = '×';
+          x.addEventListener('click', () => { discPairs.splice(i, 1); renderDiscRows(); recompute(); });
+          row.appendChild(num); row.appendChild(ix); row.appendChild(inn); row.appendChild(x);
+          c.appendChild(row);
+        }
+      }
+      function renderIntRows() {
+        const c = $('f19i-rows'); c.innerHTML = '';
+        for (let i = 0; i < intTriples.length; i++) {
+          const row = document.createElement('div'); row.className = 'tv-data-row tv-tri';
+          const num = document.createElement('div'); num.className = 'tv-row-num'; num.textContent = (i + 1);
+          const ia = document.createElement('input'); ia.type = 'text';
+          ia.value = isFinite(intTriples[i].a) ? String(intTriples[i].a).replace('.', ',') : '';
+          ia.addEventListener('input', () => {
+            const v = parseFloat(ia.value.replace(',', '.'));
+            intTriples[i].a = isFinite(v) ? v : NaN; recompute();
+          });
+          const ib = document.createElement('input'); ib.type = 'text';
+          ib.value = isFinite(intTriples[i].b) ? String(intTriples[i].b).replace('.', ',') : '';
+          ib.addEventListener('input', () => {
+            const v = parseFloat(ib.value.replace(',', '.'));
+            intTriples[i].b = isFinite(v) ? v : NaN; recompute();
+          });
+          const inn = document.createElement('input'); inn.type = 'text';
+          inn.value = isFinite(intTriples[i].n) ? String(intTriples[i].n).replace('.', ',') : '';
+          inn.addEventListener('input', () => {
+            const v = parseFloat(inn.value.replace(',', '.'));
+            intTriples[i].n = isFinite(v) ? v : NaN; recompute();
+          });
+          const x = document.createElement('button');
+          x.className = 'tv-cell-x'; x.textContent = '×';
+          x.addEventListener('click', () => { intTriples.splice(i, 1); renderIntRows(); recompute(); });
+          row.appendChild(num); row.appendChild(ia); row.appendChild(ib); row.appendChild(inn); row.appendChild(x);
+          c.appendChild(row);
+        }
+      }
+
+      function getActiveData() {
+        if (mode === 'raw') return { kind: 'raw', xs: raw.filter(v => isFinite(v)) };
+        if (mode === 'discrete') {
+          const pairs = discPairs.filter(p => isFinite(p.x) && isFinite(p.n) && p.n > 0)
+            .map(p => ({ x: p.x, n: p.n })).sort((a, b) => a.x - b.x);
+          const merged = [];
+          for (const p of pairs) {
+            if (merged.length && merged[merged.length-1].x === p.x) merged[merged.length-1].n += p.n;
+            else merged.push({ x: p.x, n: p.n });
+          }
+          return { kind: 'discrete', pairs: merged };
+        }
+        const tris = intTriples.filter(t => isFinite(t.a) && isFinite(t.b) && isFinite(t.n) && t.n > 0 && t.b > t.a)
+          .map(t => ({ a: t.a, b: t.b, n: t.n })).sort((x, y) => x.a - y.a);
+        return { kind: 'interval', tris };
+      }
+      function dataSummary(data) {
+        if (data.kind === 'raw') {
+          const xs = data.xs;
+          if (!xs.length) return null;
+          return { N: xs.length, mean: M.mean(xs), varB: M.variance(xs, true), varS: M.variance(xs, false), min: Math.min(...xs), max: Math.max(...xs) };
+        }
+        if (data.kind === 'discrete') {
+          const xs = data.pairs.map(p => p.x), ns = data.pairs.map(p => p.n);
+          const N = M.wSum(ns);
+          if (N === 0) return null;
+          return { N, mean: M.wMean(xs, ns), varB: M.wVariance(xs, ns, true), varS: M.wVariance(xs, ns, false), min: xs[0], max: xs[xs.length-1] };
+        }
+        const tris = data.tris;
+        if (!tris.length) return null;
+        return { N: tris.reduce((a,t)=>a+t.n,0), mean: M.intervalMean(tris), varB: M.intervalVariance(tris, true), varS: M.intervalVariance(tris, false), min: tris[0].a, max: tris[tris.length-1].b };
+      }
+
+      function renderParams() {
+        const dist = DISTRIBUTIONS[curDist];
+        $('f19-dist-desc').textContent = dist.desc;
+        const wrap = $('f19-params');
+        wrap.innerHTML = '';
+        for (const p of dist.params) {
+          const div = document.createElement('div'); div.className = 'tv-input';
+          const lbl = document.createElement('label'); lbl.textContent = p.label;
+          const inp = document.createElement('input'); inp.type = 'number';
+          inp.dataset.name = p.name;
+          if (p.step !== undefined) inp.step = p.step;
+          if (p.min !== undefined)  inp.min  = p.min;
+          if (p.max !== undefined)  inp.max  = p.max;
+          inp.value = manualParams[p.name];
+          inp.disabled = estimate && p.estimable;
+          inp.addEventListener('input', () => {
+            const v = parseFloat(inp.value.replace(',', '.'));
+            manualParams[p.name] = isFinite(v) ? v : p.def;
+            recompute();
+          });
+          div.appendChild(lbl); div.appendChild(inp);
+          wrap.appendChild(div);
+        }
+      }
+
+      function getEffectiveParams(summary) {
+        const dist = DISTRIBUTIONS[curDist];
+        const p = Object.assign({}, manualParams);
+        if (estimate && summary && dist.estimate) {
+          const est = dist.estimate(summary, p);
+          for (const def of dist.params) {
+            if (def.estimable && est[def.name] !== undefined && isFinite(est[def.name])) {
+              p[def.name] = est[def.name];
+              const inp = $('f19-params').querySelector('input[data-name="' + def.name + '"]');
+              if (inp) inp.value = Number(est[def.name].toPrecision(6));
+            }
+          }
+        }
+        return p;
+      }
+
+      function setMode(m) {
+        mode = m;
+        $('f19-mode-raw').style.display      = mode === 'raw'      ? '' : 'none';
+        $('f19-mode-discrete').style.display = mode === 'discrete' ? '' : 'none';
+        $('f19-mode-interval').style.display = mode === 'interval' ? '' : 'none';
+        $('f19-mode-tabs').querySelectorAll('button').forEach(b =>
+          b.classList.toggle('active', b.dataset.mode === mode));
+        recompute();
+      }
+      function setDist(d) {
+        curDist = d;
+        manualParams = initManualParams(d);
+        $('f19-dist-tabs').querySelectorAll('button').forEach(b =>
+          b.classList.toggle('active', b.dataset.dist === d));
+        renderParams();
+        recompute();
+      }
+
+      function recompute() {
+        const data = getActiveData();
+        if (mode === 'raw')           $('f19r-n').textContent = data.xs.length;
+        else if (mode === 'discrete') $('f19d-N').textContent = data.pairs.reduce((a,p)=>a+p.n, 0);
+        else                          $('f19i-N').textContent = data.tris.reduce((a,t)=>a+t.n, 0);
+
+        const summary = dataSummary(data);
+        const w = $('f19-warn');
+        if (!summary || summary.N === 0) {
+          ['chi','df','p','crit'].forEach(k => setVal('f19-' + k, '—'));
+          $('f19-conclusion').textContent = 'Введите данные.';
+          $('f19-conclusion').className = 'tv-conclusion';
+          $('f19-table').innerHTML = '';
+          w.style.display = 'none';
+          return;
+        }
+        const params = getEffectiveParams(summary);
+        const dist = DISTRIBUTIONS[curDist];
+        const nBinsManual = parseInt($('f19-bins').value);
+        const built = buildBins(mode, data, dist, params, nBinsManual);
+        if (built.error) {
+          ['chi','df','p','crit'].forEach(k => setVal('f19-' + k, '—'));
+          $('f19-conclusion').textContent = 'Расчёт невозможен — режим ввода и распределение несовместимы.';
+          $('f19-conclusion').className = 'tv-conclusion reject';
+          $('f19-table').innerHTML = '';
+          w.textContent = built.error; w.style.display = '';
+          return;
+        }
+
+        const merged = mergeBins(built.rows, 5);
+        const m_count = merged.length;
+        const r = estimate ? dist.params.filter(p => p.estimable).length : 0;
+        const k = m_count - r - 1;
+
+        let chi = 0;
+        for (const row of merged) if (row.np > 0) chi += (row.n - row.np)*(row.n - row.np) / row.np;
+
+        const alpha = parseFloat(($('f19-alpha').value || '0.05').replace(',', '.'));
+        setVal('f19-chi', fmt(chi, 4));
+        setVal('f19-df', String(k));
+        if (k <= 0) {
+          setVal('f19-p', '—'); setVal('f19-crit', '—');
+          $('f19-conclusion').innerHTML = 'Слишком мало интервалов после объединения малых ожидаемых частот (k ≤ 0). Попробуйте увеличить число интервалов или объём выборки.';
+          $('f19-conclusion').className = 'tv-conclusion reject';
+        } else {
+          const pVal = M.chiSqUpper(chi, k);
+          const crit = M.chiSqInv(alpha, k);
+          setVal('f19-p', fmt(pVal, 6));
+          setVal('f19-crit', fmt(crit, 4));
+          const accept = chi < crit;
+          $('f19-conclusion').innerHTML = accept
+            ? 'Гипотеза согласуется с данными на уровне α = ' + fmt(alpha, 4) + ': χ²<sub>набл</sub> = ' + fmt(chi, 4) + ' &lt; χ²<sub>крит</sub> = ' + fmt(crit, 4) + '. p-value = ' + fmt(pVal, 4) + '.'
+            : 'Гипотеза отклоняется на уровне α = ' + fmt(alpha, 4) + ': χ²<sub>набл</sub> = ' + fmt(chi, 4) + ' ≥ χ²<sub>крит</sub> = ' + fmt(crit, 4) + '. p-value = ' + fmt(pVal, 4) + '.';
+          $('f19-conclusion').className = 'tv-conclusion ' + (accept ? 'accept' : 'reject');
+        }
+
+        // таблица
+        let head = '<tr><th>интервал / xᵢ</th><th>nᵢ</th><th>pᵢ</th><th>Npᵢ</th><th>(nᵢ − Npᵢ)²⁄Npᵢ</th></tr>';
+        let body = '';
+        for (const row of merged) {
+          const term = row.np > 0 ? (row.n - row.np)*(row.n - row.np) / row.np : 0;
+          body += '<tr><td>' + row.label + '</td><td>' + row.n + '</td><td>' + fmt(row.pi || 0, 4) + '</td><td>' + fmt(row.np, 4) + '</td><td>' + fmt(term, 4) + '</td></tr>';
+        }
+        body += '<tr><th colspan="4" style="text-align:right">Σ</th><th>' + fmt(chi, 4) + '</th></tr>';
+        $('f19-table').innerHTML = head + body;
+
+        if (merged.length < built.rows.length) {
+          w.textContent = 'Объединено ' + (built.rows.length - merged.length) + ' малых интервалов (Npᵢ < 5). Учтено в k.';
+          w.style.display = '';
+        } else {
+          w.style.display = 'none';
+        }
+
+        // График
+        if (dist.isDiscrete) {
+          const xs = merged.map((r, i) => isFinite(r.x) ? r.x : (i + 0.5));
+          drawCompareBars($('f19-canvas'), xs, merged.map(r => r.n), merged.map(r => r.np));
+          $('f19-canvas-title').textContent = 'Бары — наблюдаемые nᵢ; точки + линия — теоретические Npᵢ';
+        } else {
+          // непрерывное: гистограмма + теоретическая плотность
+          const haveAB = merged.every(r => isFinite(r.a) || isFinite(r.b));
+          if (haveAB) {
+            const totalRange = (summary.max - summary.min) || 1;
+            const edges = [isFinite(merged[0].a) ? merged[0].a : summary.min - totalRange*0.2];
+            for (let i = 0; i < merged.length; i++) {
+              const b = merged[i].b;
+              edges.push(isFinite(b) ? b : summary.max + totalRange*0.2);
+            }
+            const freqs = merged.map(r => r.n);
+            drawHistWithCurve($('f19-canvas'), edges, freqs, x => dist.pdf(x, params), summary.N);
+            $('f19-canvas-title').textContent = 'Гистограмма наблюдаемых частот; красная линия — теоретическая плотность';
+          } else {
+            drawCompareBars($('f19-canvas'), merged.map((r, i) => i), merged.map(r => r.n), merged.map(r => r.np));
+            $('f19-canvas-title').textContent = 'Наблюдаемые vs теоретические частоты';
+          }
+        }
+      }
+
+      // === слушатели ===
+      $('f19-mode-tabs').querySelectorAll('button').forEach(b =>
+        b.addEventListener('click', () => setMode(b.dataset.mode)));
+      $('f19-dist-tabs').querySelectorAll('button').forEach(b =>
+        b.addEventListener('click', () => setDist(b.dataset.dist)));
+      $('f19-estimate').addEventListener('change', () => {
+        estimate = $('f19-estimate').checked;
+        renderParams(); recompute();
+      });
+      $('f19-alpha').addEventListener('input', recompute);
+      $('f19-bins').addEventListener('input', recompute);
+
+      // Raw
+      $('f19r-apply').addEventListener('click', () => {
+        const parsed = parseData($('f19r-text').value);
+        raw = parsed.length ? parsed.slice() : new Array(10).fill(NaN);
+        renderRawCells(); recompute();
+      });
+      $('f19r-example').addEventListener('click', () => {
+        raw = [165,170,175,168,172,178,174,169,171,173,177,175,168,170,172,174,176,173,169,171,170,172,174,168,176];
+        $('f19r-text').value = raw.join(', '); renderRawCells(); recompute();
+      });
+      $('f19r-clear').addEventListener('click', () => { raw = new Array(10).fill(NaN); $('f19r-text').value=''; renderRawCells(); recompute(); });
+      $('f19r-add10').addEventListener('click', () => { for (let i = 0; i < 10; i++) raw.push(NaN); renderRawCells(); });
+      $('f19r-text').addEventListener('blur', () => { if ($('f19r-text').value.trim()) $('f19r-apply').click(); });
+
+      // Discrete
+      $('f19d-apply').addEventListener('click', () => {
+        const arr = parseData($('f19d-text').value);
+        const pairs = []; for (let i = 0; i + 1 < arr.length; i += 2) pairs.push({ x: arr[i], n: arr[i + 1] });
+        discPairs = pairs.length ? pairs : Array.from({length: 5}, () => ({ x: NaN, n: NaN }));
+        renderDiscRows(); recompute();
+      });
+      $('f19d-example').addEventListener('click', () => {
+        discPairs = [{x:0,n:18},{x:1,n:26},{x:2,n:18},{x:3,n:7},{x:4,n:1}];
+        $('f19d-text').value = discPairs.map(p => p.x + ' ' + p.n).join(', ');
+        // авто-выбираем Пуассон
+        setDist('poisson');
+        renderDiscRows(); recompute();
+      });
+      $('f19d-clear').addEventListener('click', () => { discPairs = Array.from({length:5}, () => ({x:NaN,n:NaN})); $('f19d-text').value=''; renderDiscRows(); recompute(); });
+      $('f19d-add').addEventListener('click', () => { discPairs.push({x:NaN,n:NaN}); renderDiscRows(); });
+      $('f19d-text').addEventListener('blur', () => { if ($('f19d-text').value.trim()) $('f19d-apply').click(); });
+
+      // Interval
+      $('f19i-apply').addEventListener('click', () => {
+        const arr = parseData($('f19i-text').value);
+        const tris = []; for (let i = 0; i + 2 < arr.length; i += 3) tris.push({ a: arr[i], b: arr[i + 1], n: arr[i + 2] });
+        intTriples = tris.length ? tris : Array.from({length: 5}, () => ({ a: NaN, b: NaN, n: NaN }));
+        renderIntRows(); recompute();
+      });
+      $('f19i-example').addEventListener('click', () => {
+        intTriples = [{a:0,b:10,n:5},{a:10,b:20,n:12},{a:20,b:30,n:18},{a:30,b:40,n:10},{a:40,b:50,n:5}];
+        $('f19i-text').value = intTriples.map(t => t.a + ' ' + t.b + ' ' + t.n).join(', ');
+        renderIntRows(); recompute();
+      });
+      $('f19i-clear').addEventListener('click', () => { intTriples = Array.from({length:5}, () => ({a:NaN,b:NaN,n:NaN})); $('f19i-text').value=''; renderIntRows(); recompute(); });
+      $('f19i-add').addEventListener('click', () => { intTriples.push({a:NaN,b:NaN,n:NaN}); renderIntRows(); });
+      $('f19i-text').addEventListener('blur', () => { if ($('f19i-text').value.trim()) $('f19i-apply').click(); });
+
+      renderRawCells(); renderDiscRows(); renderIntRows();
+      setDist('normal');
+      setMode('raw');
+    }
+  }
+];
+
+/* ============================================================
+   5. ИНИЦИАЛИЗАЦИЯ
+   ============================================================ */
+function showPage(id) {
+  PAGES.forEach(p => {
+    const el = $('page-' + p.id);
+    if (el) el.classList.toggle('active', p.id === id);
+  });
+  document.querySelectorAll('.tv-nav button').forEach(b => {
+    b.classList.toggle('active', b.dataset.id === id);
+  });
+  // перерисовать графики на активной странице
+  const page = PAGES.find(p => p.id === id);
+  if (page && typeof page._refresh === 'function') page._refresh();
+}
+
+// Логические группы для навигации (общий порядок и сквозная нумерация)
+const NAV_ORDER = [
+  { group: 'Комбинаторика',               ids: ['fact', 'comb', 'bern'] },
+  { group: 'Функции нормального',         ids: ['phi', 'laplace', 'invlap'] },
+  { group: 'Дискретные распределения',    ids: ['binom', 'poisson', 'hyper', 'geom'] },
+  { group: 'Непрерывные распределения',   ids: ['norm', 'expdist', 'unif', 'gamma', 'beta'] },
+  { group: 'Проверка гипотез',            ids: ['student', 'chi', 'fisher'] },
+  { group: 'Выборочная статистика',       ids: ['stats', 'pearson'] }
+];
+const orderedIds = NAV_ORDER.flatMap(g => g.ids);
+const stripPrefix = (s) => (s || '').replace(/^\d+\*?\.\s*/, '');
+
+function init() {
+  const nav = $('tvNav');
+  const main = $('tvMain');
+
+  // Навигация по группам, страницы в порядке NAV_ORDER
+  let counter = 0;
+  for (const grp of NAV_ORDER) {
+    const h = document.createElement('div');
+    h.className = 'tv-nav-group';
+    h.textContent = grp.group;
+    nav.appendChild(h);
+    for (const id of grp.ids) {
+      const p = PAGES.find(x => x.id === id);
+      if (!p) continue;
+      counter++;
+      const btn = document.createElement('button');
+      btn.textContent = counter + '. ' + stripPrefix(p.nav);
+      btn.dataset.id = id;
+      btn.addEventListener('click', () => showPage(id));
+      nav.appendChild(btn);
+    }
+  }
+  // Страницы — в том же порядке
+  let pageNum = 0;
+  for (const id of orderedIds) {
+    const p = PAGES.find(x => x.id === id);
+    if (!p) continue;
+    pageNum++;
+    const sec = document.createElement('section');
+    sec.id = 'page-' + p.id;
+    sec.className = 'tv-page';
+    sec.innerHTML = `
+      <h2><span class="tv-page-num">${pageNum}.</span>${stripPrefix(p.title)}</h2>
+      <p class="tv-desc">${p.desc}</p>
+      <div class="tv-formula">${p.formula}</div>
+      ${p.html}
+    `;
+    main.appendChild(sec);
+  }
+
+  PAGES.forEach(p => p.init && p.init());
+
+  // === ПОПОВЕР СПРАВКИ ===
+  const popover = document.createElement('div');
+  popover.className = 'tv-popover';
+  $('terverApp').appendChild(popover);
+  let popoverOpenedBy = null;
+  function showPopover(icon) {
+    const text = icon.dataset.help || '';
+    const formula = icon.dataset.formula || '';
+    popover.innerHTML = (text ? '<div>' + text + '</div>' : '') +
+      (formula ? '<div class="tv-popover-formula">' + formula + '</div>' : '');
+    popover.style.display = 'block';
+    const r = icon.getBoundingClientRect();
+    const pw = popover.offsetWidth;
+    const ph = popover.offsetHeight;
+    let left = r.left;
+    if (left + pw > window.innerWidth - 12) left = window.innerWidth - pw - 12;
+    if (left < 12) left = 12;
+    let top = r.bottom + 8;
+    if (top + ph > window.innerHeight - 12) top = r.top - ph - 8;
+    popover.style.left = left + 'px';
+    popover.style.top  = top + 'px';
+    popoverOpenedBy = icon;
+  }
+  function hidePopover() {
+    popover.style.display = 'none';
+    popoverOpenedBy = null;
+  }
+  document.addEventListener('click', (e) => {
+    const icon = e.target.closest('.tv-help-icon');
+    if (icon) {
+      e.stopPropagation();
+      if (popoverOpenedBy === icon) hidePopover();
+      else showPopover(icon);
+    } else if (!e.target.closest('.tv-popover')) {
+      hidePopover();
+    }
+  });
+  window.addEventListener('scroll', hidePopover, true);
+  window.addEventListener('resize', hidePopover);
+
+  // theme toggle
+  const themeBtn = $('tvTheme');
+  const app = $('terverApp');
+  function setTheme(t) {
+    app.dataset.theme = t;
+    themeBtn.textContent = t === 'dark' ? '☀ Светлая' : '☾ Тёмная';
+    try { localStorage.setItem('terver-theme', t); } catch (e) {}
+    // перерисовать активный график (цвета берутся из CSS-переменных)
+    const active = document.querySelector('.tv-page.active');
+    if (active) {
+      const id = active.id.replace('page-', '');
+      const page = PAGES.find(p => p.id === id);
+      if (page && page.init) {
+        // лёгкий способ перерендерить — диспатчим input на любом её инпуте
+        const inp = active.querySelector('input');
+        if (inp) inp.dispatchEvent(new Event('input'));
+      }
+    }
+  }
+  themeBtn.addEventListener('click', () => {
+    setTheme(app.dataset.theme === 'dark' ? 'light' : 'dark');
+  });
+  let saved = 'light';
+  try { saved = localStorage.getItem('terver-theme') || 'light'; } catch (e) {}
+  setTheme(saved);
+
+  showPage(PAGES[0].id);
+
+  // перерисовка при ресайзе
+  let rzTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(rzTimer);
+    rzTimer = setTimeout(() => {
+      const active = document.querySelector('.tv-page.active');
+      if (!active) return;
+      const inp = active.querySelector('input');
+      if (inp) inp.dispatchEvent(new Event('input'));
+    }, 120);
+  });
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
+})();
+</script>
+</body>
+</html>
