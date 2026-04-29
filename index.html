@@ -1775,7 +1775,7 @@ function makeHelp(text, formula) {
 const DISTRIBUTIONS = {
   normal: {
     label: 'Нормальное N(μ, σ)',
-    desc: 'Параметры μ — мат.ожидание, σ — стандартное отклонение. Метод моментов: μ̂ = x̄, σ̂ = s.',
+    desc: 'Параметры μ — мат.ожидание, σ — стандартное отклонение. Оценки по выборке: μ̂ = x̄, σ̂ = σ_в = √D_в (выборочное, как в учебниках Гмурмана и материалах А. Емелина / mathprofi.ru).',
     isDiscrete: false,
     params: [
       { name: 'mu',    label: 'μ',    def: 0, step: 0.01, estimable: true },
@@ -1783,7 +1783,7 @@ const DISTRIBUTIONS = {
     ],
     cdf: (x, p) => M.normCdf(x, p.mu, p.sigma),
     pdf: (x, p) => M.normPdf(x, p.mu, p.sigma),
-    estimate: (s) => ({ mu: s.mean, sigma: Math.sqrt(Math.max(s.varS, 1e-12)) })
+    estimate: (s) => ({ mu: s.mean, sigma: Math.sqrt(Math.max(s.varB, 1e-12)) })
   },
   uniform: {
     label: 'Равномерное U(a, b)',
@@ -1844,8 +1844,11 @@ const DISTRIBUTIONS = {
   }
 };
 
-/* === buildBins: формирует расчётную таблицу для критерия Пирсона === */
-function buildBins(mode, data, dist, params, nBinsManual) {
+/* === buildBins: формирует расчётную таблицу для критерия Пирсона ===
+   method: 'density' — учебная конвенция, n′ = h·N·f((a+b)/2);
+           'cdf'     — точный интеграл, n′ = N·(F(b)−F(a)) с расширением хвостов до ±∞ */
+function buildBins(mode, data, dist, params, nBinsManual, method) {
+  method = method || 'density';
   const N = mode === 'raw'      ? data.xs.length
           : mode === 'discrete' ? data.pairs.reduce((a,p)=>a+p.n, 0)
           :                       data.tris.reduce((a,t)=>a+t.n, 0);
@@ -1897,18 +1900,34 @@ function buildBins(mode, data, dist, params, nBinsManual) {
   const m = ns.length;
   const rows = [];
   for (let i = 0; i < m; i++) {
-    const lo = i === 0       ? -Infinity : edges[i];
-    const hi = i === m - 1   ? +Infinity : edges[i + 1];
-    const Flo = isFinite(lo) ? dist.cdf(lo, params) : 0;
-    const Fhi = isFinite(hi) ? dist.cdf(hi, params) : 1;
-    const pi = Math.max(0, Fhi - Flo);
-    const labelLo = i === 0     ? '−∞' : fmt(lo, 4);
-    const labelHi = i === m - 1 ? '+∞' : fmt(hi, 4);
-    rows.push({
-      label: '[' + labelLo + '; ' + labelHi + ')',
-      n: ns[i], pi, np: N * pi,
-      a: edges[i], b: edges[i + 1], x: (edges[i] + edges[i + 1]) / 2
-    });
+    const a = edges[i], b = edges[i + 1];
+    const labelLo = fmt(a, 4), labelHi = fmt(b, 4);
+    let pi;
+    if (method === 'density') {
+      // учебный метод: n′ = h·N·f((a+b)/2). pᵢ = h·f(середины).
+      const h = b - a;
+      const mid = (a + b) / 2;
+      pi = h * dist.pdf(mid, params);
+      rows.push({
+        label: '[' + labelLo + '; ' + labelHi + ')',
+        n: ns[i], pi, np: N * pi,
+        a, b, x: mid
+      });
+    } else {
+      // CDF метод: расширяем крайние интервалы до ±∞, чтобы Σpᵢ = 1
+      const lo = i === 0       ? -Infinity : a;
+      const hi = i === m - 1   ? +Infinity : b;
+      const Flo = isFinite(lo) ? dist.cdf(lo, params) : 0;
+      const Fhi = isFinite(hi) ? dist.cdf(hi, params) : 1;
+      pi = Math.max(0, Fhi - Flo);
+      const lLo = i === 0     ? '−∞' : labelLo;
+      const lHi = i === m - 1 ? '+∞' : labelHi;
+      rows.push({
+        label: '[' + lLo + '; ' + lHi + ')',
+        n: ns[i], pi, np: N * pi,
+        a, b, x: (a + b) / 2
+      });
+    }
   }
   return { rows, N, edges, ns };
 }
@@ -3362,6 +3381,16 @@ const PAGES = [
       </div>
       <div class="tv-inputs" id="f19-params"></div>
 
+      <div id="f19-method-block" style="margin-top: 8px;">
+        <div style="font-size:13px; color:var(--muted); font-style:italic; margin-bottom:6px;">
+          Метод теоретических частот ${makeHelp('Два классических способа найти теоретические частоты в критерии Пирсона. «По плотности» — учебная конвенция (Гмурман В.Е., «Теория вероятностей и математическая статистика»; материалы А. Емелина / mathprofi.ru): n′ᵢ = (hᵢ · N / σ) · φ(zᵢ), где φ — плотность стандартного нормального, zᵢ = (xᵢ⁎ − x̄)/σ, xᵢ⁎ — середина интервала. Это приближение интеграла под кривой плотности прямоугольником. «По функции распределения F» — точный интеграл pᵢ = F(bᵢ) − F(aᵢ); первый интервал расширяется до −∞, последний до +∞, чтобы Σpᵢ = 1 ровно. Оба метода корректны и приводят, как правило, к одному выводу о гипотезе, но дают слегка разные числовые χ².', '')}
+        </div>
+        <div class="tv-tabs" id="f19-method-tabs">
+          <button data-method="density" class="active">По плотности (учебник)</button>
+          <button data-method="cdf">По функции распределения F</button>
+        </div>
+      </div>
+
       <div class="tv-inputs">
         <div class="tv-input"><label>α (уровень значимости)</label>
           <input type="number" id="f19-alpha" min="0.001" max="0.5" step="0.001" value="0.05"></div>
@@ -3392,6 +3421,7 @@ const PAGES = [
       let curDist = 'normal';
       let manualParams = {};
       let estimate = true;
+      let method = 'density';
 
       function initManualParams(distId) {
         const d = DISTRIBUTIONS[distId];
@@ -3590,7 +3620,9 @@ const PAGES = [
         const params = getEffectiveParams(summary);
         const dist = DISTRIBUTIONS[curDist];
         const nBinsManual = parseInt($('f19-bins').value);
-        const built = buildBins(mode, data, dist, params, nBinsManual);
+        // переключатель метода имеет смысл только для непрерывных распределений
+        $('f19-method-block').style.display = dist.isDiscrete ? 'none' : '';
+        const built = buildBins(mode, data, dist, params, nBinsManual, dist.isDiscrete ? 'pmf' : method);
         if (built.error) {
           ['chi','df','p','crit'].forEach(k => setVal('f19-' + k, '—'));
           $('f19-conclusion').textContent = 'Расчёт невозможен — режим ввода и распределение несовместимы.';
@@ -3674,6 +3706,13 @@ const PAGES = [
         b.addEventListener('click', () => setMode(b.dataset.mode)));
       $('f19-dist-tabs').querySelectorAll('button').forEach(b =>
         b.addEventListener('click', () => setDist(b.dataset.dist)));
+      $('f19-method-tabs').querySelectorAll('button').forEach(b =>
+        b.addEventListener('click', () => {
+          method = b.dataset.method;
+          $('f19-method-tabs').querySelectorAll('button').forEach(x =>
+            x.classList.toggle('active', x.dataset.method === method));
+          recompute();
+        }));
       $('f19-estimate').addEventListener('change', () => {
         estimate = $('f19-estimate').checked;
         renderParams(); recompute();
