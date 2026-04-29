@@ -3676,26 +3676,24 @@ const PAGES = [
           w.style.display = 'none';
         }
 
-        // График
+        // График: рисуем по ИСХОДНЫМ интервалам (built.rows), а не по объединённым.
+        // Объединение влияет только на расчёт χ², гистограмма должна показывать все исходные столбики.
         if (dist.isDiscrete) {
-          const xs = merged.map((r, i) => isFinite(r.x) ? r.x : (i + 0.5));
-          drawCompareBars($('f19-canvas'), xs, merged.map(r => r.n), merged.map(r => r.np));
+          const src = built.rows;
+          const xs = src.map((r, i) => isFinite(r.x) ? r.x : (i + 0.5));
+          drawCompareBars($('f19-canvas'), xs, src.map(r => r.n), src.map(r => r.np));
           $('f19-canvas-title').textContent = 'Бары — наблюдаемые nᵢ; точки + линия — теоретические Npᵢ';
         } else {
-          // непрерывное: гистограмма + теоретическая плотность
-          const haveAB = merged.every(r => isFinite(r.a) || isFinite(r.b));
+          const src = built.rows;
+          const haveAB = src.every(r => isFinite(r.a) && isFinite(r.b));
           if (haveAB) {
-            const totalRange = (summary.max - summary.min) || 1;
-            const edges = [isFinite(merged[0].a) ? merged[0].a : summary.min - totalRange*0.2];
-            for (let i = 0; i < merged.length; i++) {
-              const b = merged[i].b;
-              edges.push(isFinite(b) ? b : summary.max + totalRange*0.2);
-            }
-            const freqs = merged.map(r => r.n);
+            const edges = [src[0].a];
+            for (const r of src) edges.push(r.b);
+            const freqs = src.map(r => r.n);
             drawHistWithCurve($('f19-canvas'), edges, freqs, x => dist.pdf(x, params), summary.N);
-            $('f19-canvas-title').textContent = 'Гистограмма наблюдаемых частот; красная линия — теоретическая плотность';
+            $('f19-canvas-title').textContent = 'Гистограмма по всем ' + src.length + ' исходным интервалам; красная линия — теоретическая плотность. Объединение малых интервалов учтено только в χ², но не на графике.';
           } else {
-            drawCompareBars($('f19-canvas'), merged.map((r, i) => i), merged.map(r => r.n), merged.map(r => r.np));
+            drawCompareBars($('f19-canvas'), src.map((r, i) => i), src.map(r => r.n), src.map(r => r.np));
             $('f19-canvas-title').textContent = 'Наблюдаемые vs теоретические частоты';
           }
         }
