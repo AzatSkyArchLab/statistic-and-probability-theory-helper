@@ -1715,18 +1715,32 @@ function drawCompareBars(canvas, xs, observed, expected, opts) {
 /* === Гистограмма + теоретическая плотность поверх (для непрерывных дистр.) === */
 function drawHistWithCurve(canvas, edges, freqs, fn, N, opts) {
   opts = opts || {};
-  // нормализация плотности к шкале частот: f(x)·N·h_i — высота, эквивалентная частоте
-  // используем равные интервалы (h одинаковый), для интервального ряда h может быть разным
-  // → вычислим h_i на каждом интервале и масштабируем плотность отдельно
-  const yMaxAuto = Math.max(...freqs.filter(isFinite)) * 1.15 || 1;
-  const xMin = edges[0] - (edges[edges.length-1] - edges[0]) * 0.05;
-  const xMax = edges[edges.length-1] + (edges[edges.length-1] - edges[0]) * 0.05;
+  const xLo = edges[0], xHi = edges[edges.length-1];
+  const xMin = xLo - (xHi - xLo) * 0.05;
+  const xMax = xHi + (xHi - xLo) * 0.05;
+
+  // Сначала просчитываем теоретическую кривую и находим её максимум,
+  // чтобы Y-ось вместила и наблюдаемые частоты, и пик плотности.
+  const hAvg = (xHi - xLo) / freqs.length;
+  const STEPS = 240;
+  const xs = [], ys = [];
+  let yTheoMax = 0;
+  for (let i = 0; i <= STEPS; i++) {
+    const x = xMin + (xMax - xMin) * i / STEPS;
+    const y = fn(x) * N * hAvg;
+    xs.push(x); ys.push(y);
+    if (isFinite(y) && y > yTheoMax) yTheoMax = y;
+  }
+  const yObsMax = Math.max(...freqs.filter(isFinite)) || 0;
+  const yMaxAuto = Math.max(yObsMax, yTheoMax) * 1.12 || 1;
+
   const A = drawAxes(canvas, {
     xMin, xMax, yMin: 0, yMax: yMaxAuto,
     xLabel: opts.xLabel || 'x', yLabel: opts.yLabel || 'Частота'
   });
   const ctx = A.ctx;
-  // бары
+
+  // Бары
   ctx.fillStyle = getCss('--chart-bar');
   ctx.strokeStyle = getCss('--card');
   for (let k = 0; k < freqs.length; k++) {
@@ -1735,20 +1749,17 @@ function drawHistWithCurve(canvas, edges, freqs, fn, N, opts) {
     ctx.fillRect(x0, y1, x1 - x0, y0 - y1);
     ctx.strokeRect(x0, y1, x1 - x0, y0 - y1);
   }
-  // теоретическая кривая: высота = f(x) · N · h_среднее
-  // (для удобства возьмём средний h)
-  const hAvg = (edges[edges.length-1] - edges[0]) / freqs.length;
+
+  // Теоретическая кривая
   ctx.strokeStyle = getCss('--chart-marker');
   ctx.lineWidth = 2;
   ctx.beginPath();
-  const STEPS = 200;
   let started = false;
-  for (let i = 0; i <= STEPS; i++) {
-    const x = edges[0] + (edges[edges.length-1] - edges[0]) * i / STEPS;
-    const y = fn(x) * N * hAvg;
+  for (let i = 0; i < xs.length; i++) {
+    const y = ys[i];
     if (!isFinite(y)) { started = false; continue; }
-    const py = A.yToPx(Math.min(y, yMaxAuto));
-    const px = A.xToPx(x);
+    const px = A.xToPx(xs[i]);
+    const py = A.yToPx(y);
     if (!started) { ctx.moveTo(px, py); started = true; } else { ctx.lineTo(px, py); }
   }
   ctx.stroke();
