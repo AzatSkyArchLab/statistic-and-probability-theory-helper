@@ -1880,8 +1880,12 @@ function buildBins(mode, data, dist, params, nBinsManual, method) {
       pSum += pi;
       rows.push({ label: 'X = ' + fmt(p.x, 4), n: p.n, pi, np: N * pi, x: p.x });
     }
+    // В режиме 'cdf' (точный) добавляем хвост, чтобы Σpᵢ = 1.
+    // В режиме 'density' (учебник) хвост игнорируется — недобор уходит «в бесконечность».
     const tail = 1 - pSum;
-    if (tail > 1e-9) rows.push({ label: 'другие значения', n: 0, pi: tail, np: N * tail, x: NaN });
+    if (method === 'cdf' && tail > 1e-9) {
+      rows.push({ label: 'другие значения', n: 0, pi: tail, np: N * tail, x: NaN });
+    }
     return { rows, N };
   }
 
@@ -1943,8 +1947,11 @@ function buildBins(mode, data, dist, params, nBinsManual, method) {
   return { rows, N, edges, ns };
 }
 
-/* === mergeBins: объединяет соседние строки, пока Npᵢ < threshold === */
-function mergeBins(rows, threshold) {
+/* === mergeBins: объединяет соседние строки с малыми Npᵢ.
+   strict=true  — каскадно сливать, пока каждая итоговая группа ≥ threshold (математически чистое правило);
+   strict=false — учебная конвенция (Гмурман / mathprofi): объединить только подряд идущие малые в хвостах,
+                  итоговая группа может остаться < threshold, если соседи к этому моменту уже ≥ threshold. */
+function mergeBins(rows, threshold, strict) {
   threshold = threshold || 5;
   const out = [];
   for (const r of rows) {
@@ -1959,7 +1966,7 @@ function mergeBins(rows, threshold) {
       out.push(Object.assign({}, r));
     }
   }
-  if (out.length >= 2 && out[out.length - 1].np < threshold) {
+  if (strict && out.length >= 2 && out[out.length - 1].np < threshold) {
     const last = out.pop();
     const prev = out[out.length - 1];
     prev.label = prev.label + ' ∪ ' + last.label;
@@ -3394,11 +3401,11 @@ const PAGES = [
 
       <div id="f19-method-block" style="margin-top: 8px;">
         <div style="font-size:13px; color:var(--muted); font-style:italic; margin-bottom:6px;">
-          Метод теоретических частот ${makeHelp('Два классических способа найти теоретические частоты в критерии Пирсона. «По плотности» — учебная конвенция (Гмурман В.Е., «Теория вероятностей и математическая статистика»; материалы А. Емелина / mathprofi.ru): n′ᵢ = (hᵢ · N / σ) · φ(zᵢ), где φ — плотность стандартного нормального, zᵢ = (xᵢ⁎ − x̄)/σ, xᵢ⁎ — середина интервала. Это приближение интеграла под кривой плотности прямоугольником. «По функции распределения F» — точный интеграл pᵢ = F(bᵢ) − F(aᵢ); первый интервал расширяется до −∞, последний до +∞, чтобы Σpᵢ = 1 ровно. Оба метода корректны и приводят, как правило, к одному выводу о гипотезе, но дают слегка разные числовые χ².', '')}
+          Метод теоретических частот ${makeHelp('Учебная конвенция (Гмурман В.Е. «Теория вероятностей и математическая статистика»; А. Емелин / mathprofi.ru): для непрерывных дистр. n′ᵢ = (hᵢ · N / σ) · φ(zᵢ) — приближение интеграла плотностью в середине интервала; для дискретных — теоретические частоты считаются только для значений, встретившихся в выборке (Σn′ᵢ может быть чуть меньше N, недобор уходит «в бесконечный хвост»); объединение малых интервалов делается только в хвостах без каскадных слияний. Точная нормировка: для непрерывных — интеграл pᵢ = F(bᵢ) − F(aᵢ) с расширением крайних интервалов до ±∞; для дискретных — добавляется группа «другие значения» с pᵢ = 1 − Σ. Объединение строго каскадное, пока каждая итоговая группа ≥ 5. Оба варианта корректны и обычно приводят к одному выводу о гипотезе, но числовые χ² немного различаются.', '')}
         </div>
         <div class="tv-tabs" id="f19-method-tabs">
-          <button data-method="density" class="active">По плотности (учебник)</button>
-          <button data-method="cdf">По функции распределения F</button>
+          <button data-method="density" class="active">Учебник (Гмурман / mathprofi)</button>
+          <button data-method="cdf">Точная нормировка</button>
         </div>
       </div>
 
@@ -3631,9 +3638,10 @@ const PAGES = [
         const params = getEffectiveParams(summary);
         const dist = DISTRIBUTIONS[curDist];
         const nBinsManual = parseInt($('f19-bins').value);
-        // переключатель метода имеет смысл только для непрерывных распределений
-        $('f19-method-block').style.display = dist.isDiscrete ? 'none' : '';
-        const built = buildBins(mode, data, dist, params, nBinsManual, dist.isDiscrete ? 'pmf' : method);
+        // переключатель методов работает и для дискретных:
+        //  density — учебная конвенция (без хвоста, мягкое объединение),
+        //  cdf     — точная (с хвостом, строгое объединение)
+        const built = buildBins(mode, data, dist, params, nBinsManual, method);
         if (built.error) {
           ['chi','df','p','crit'].forEach(k => setVal('f19-' + k, '—'));
           $('f19-conclusion').textContent = 'Расчёт невозможен — режим ввода и распределение несовместимы.';
@@ -3643,7 +3651,7 @@ const PAGES = [
           return;
         }
 
-        const merged = mergeBins(built.rows, 5);
+        const merged = mergeBins(built.rows, 5, method === 'cdf');
         const m_count = merged.length;
         const r = estimate ? dist.params.filter(p => p.estimable).length : 0;
         const k = m_count - r - 1;
